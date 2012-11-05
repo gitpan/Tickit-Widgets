@@ -1,6 +1,8 @@
 Build.PL
 Changes
+examples/demo-button.pl
 examples/demo-entry.pl
+lib/Tickit/Widget/Button.pm
 lib/Tickit/Widget/Entry.pm
 lib/Tickit/Widgets.pm
 LICENSE
@@ -13,4 +15,5 @@ t/00use.t
 t/01widget-entry-model.t
 t/02widget-entry-input.t
 t/03widget-entry-scroll.t
+t/10widget-button.t
 t/99pod.t

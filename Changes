@@ -1,4 +1,8 @@
 Revision history for Tickit-Widgets
 
+0.02    CHANGES:
+         * Added Tickit::Widget::Button
+         * Document Tickit::Widget::Entry constructor arguments
+
 0.01    First version, released on an unsuspecting world.
 

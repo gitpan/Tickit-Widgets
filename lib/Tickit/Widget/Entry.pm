@@ -123,6 +123,24 @@ Move the cursor one word right
 
 Constructs a new C<Tickit::Widget::Entry> object.
 
+Takes the following named arguments:
+
+=over 8
+
+=item text => STR
+
+Optional. Initial text to display in the box
+
+=item position => INT
+
+Optional. Initial position of the cursor within the text.
+
+=item on_enter => CODE
+
+Optional. Callback function to invoke when the C<< <Enter> >> key is pressed.
+
+=back
+
 =cut
 
 sub new

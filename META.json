@@ -27,13 +27,17 @@
       }
    },
    "provides" : {
+      "Tickit::Widget::Button" : {
+         "file" : "lib/Tickit/Widget/Button.pm",
+         "version" : "0.02"
+      },
       "Tickit::Widget::Entry" : {
          "file" : "lib/Tickit/Widget/Entry.pm",
          "version" : "0.19"
       },
       "Tickit::Widgets" : {
          "file" : "lib/Tickit/Widgets.pm",
-         "version" : "0.01"
+         "version" : "0.02"
       }
    },
    "release_status" : "stable",
@@ -42,5 +46,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.01"
+   "version" : "0.02"
 }

@@ -12,15 +12,18 @@ meta-spec:
   version: 1.4
 name: Tickit-Widgets
 provides:
+  Tickit::Widget::Button:
+    file: lib/Tickit/Widget/Button.pm
+    version: 0.02
   Tickit::Widget::Entry:
     file: lib/Tickit/Widget/Entry.pm
     version: 0.19
   Tickit::Widgets:
     file: lib/Tickit/Widgets.pm
-    version: 0.01
+    version: 0.02
 requires:
   Tickit::Utils: 0
   Tickit::Widget: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.01
+version: 0.02
