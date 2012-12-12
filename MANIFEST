@@ -1,9 +1,13 @@
 Build.PL
 Changes
+examples/demo-border.pl
 examples/demo-button.pl
 examples/demo-entry.pl
+examples/demo-frame.pl
+lib/Tickit/Widget/Border.pm
 lib/Tickit/Widget/Button.pm
 lib/Tickit/Widget/Entry.pm
+lib/Tickit/Widget/Frame.pm
 lib/Tickit/Widgets.pm
 LICENSE
 Makefile.PL
@@ -16,4 +20,6 @@ t/01widget-entry-model.t
 t/02widget-entry-input.t
 t/03widget-entry-scroll.t
 t/10widget-button.t
+t/20widget-frame.t
+t/21widget-border.t
 t/99pod.t

@@ -1,5 +1,10 @@
 Revision history for Tickit-Widgets
 
+0.03    CHANGES:
+         * Added Tickit::Widget::Frame (copy from Tickit dist)
+         * Added Tickit::Widget::Border (copy of Tickit::Widget::Box in
+           Tickit dist)
+
 0.02    CHANGES:
          * Added Tickit::Widget::Button
          * Document Tickit::Widget::Entry constructor arguments

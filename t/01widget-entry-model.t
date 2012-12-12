@@ -162,49 +162,51 @@ is_display( [ "Different text" ],
 
 is_cursorpos( 0, 3, 'Position after ->set_text' );
 
+$entry->set_window( undef );
+$win->clear;
+drain_termlog;
+
 # A window that doesn't extend to righthand edge of screen, so ICH/DCH won't
 # work
-my $subwin = $win->make_sub( 2, 2, $win->lines - 4, $win->cols - 4 );
+{
+   my $subwin = $win->make_sub( 2, 2, $win->lines - 4, $win->cols - 4 );
 
-$entry->set_window( undef ); $win->clear;
+   $entry->set_window( $subwin );
 
-$entry->set_window( $subwin );
+   flush_tickit;
 
-flush_tickit;
+   is_termlog( [ GOTO(2,2),
+                 SETPEN,
+                 PRINT("Different text"),
+                 SETBG(undef),
+                 ERASECH(62),
+                 ( map { GOTO($_,2), SETBG(undef), ERASECH(76) } 3 .. 22 ),
+                 GOTO(2,5) ],
+               'Termlog in subwindow' );
 
-is_termlog( [ SETBG(undef),
-              CLEAR,
-              GOTO(2,2),
-              SETPEN,
-              PRINT("Different text"),
-              SETBG(undef),
-              ERASECH(62),
-              ( map { GOTO($_,2), SETBG(undef), ERASECH(76) } 3 .. 22 ),
-              GOTO(2,5) ],
-            'Termlog in subwindow' );
+   is_display( [ "", "", "  Different text" ],
+               'Display in subwindow' );
 
-is_display( [ "", "", "  Different text" ],
-            'Display in subwindow' );
+   $entry->text_insert( "And ", 0 );
 
-$entry->text_insert( "And ", 0 );
+   flush_tickit;
 
-flush_tickit;
+   is_termlog( [ SETBG(undef),
+                 GOTO(2,2),
+                 SETPEN,
+                 PRINT("And Different text"),
+                 SETBG(undef),
+                 ERASECH(58),
+                 GOTO(2,2),
+                 GOTO(2,9),
+                 GOTO(2,9) ], # TODO: Maybe these can be made more efficient?
+               'Termlog after ->text_insert in subwindow' );
 
-is_termlog( [ SETBG(undef),
-              GOTO(2,2),
-              SETPEN,
-              PRINT("And Different text"),
-              SETBG(undef),
-              ERASECH(58),
-              GOTO(2,2),
-              GOTO(2,9),
-              GOTO(2,9) ], # TODO: Maybe these can be made more efficient?
-            'Termlog after ->text_insert in subwindow' );
+   is_display( [ "", "", "  And Different text" ],
+               'Display after ->text_insert in subwindow' );
 
-is_display( [ "", "", "  And Different text" ],
-            'Display after ->text_insert in subwindow' );
-
-$entry->set_window( undef );
+   $entry->set_window( undef );
+}
 
 $entry = Tickit::Widget::Entry->new(
    text     => "Some initial text",

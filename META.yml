@@ -5,25 +5,31 @@ author:
 build_requires:
   Test::More: 0
 dynamic_config: 1
-generated_by: 'Module::Build version 0.4001, CPAN::Meta::Converter version 2.120630'
+generated_by: 'Module::Build version 0.4001, CPAN::Meta::Converter version 2.120921'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
 name: Tickit-Widgets
 provides:
+  Tickit::Widget::Border:
+    file: lib/Tickit/Widget/Border.pm
+    version: 0.03
   Tickit::Widget::Button:
     file: lib/Tickit/Widget/Button.pm
-    version: 0.02
+    version: 0.03
   Tickit::Widget::Entry:
     file: lib/Tickit/Widget/Entry.pm
     version: 0.19
+  Tickit::Widget::Frame:
+    file: lib/Tickit/Widget/Frame.pm
+    version: 0.24
   Tickit::Widgets:
     file: lib/Tickit/Widgets.pm
-    version: 0.02
+    version: 0.03
 requires:
   Tickit::Utils: 0
   Tickit::Widget: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.02
+version: 0.03
