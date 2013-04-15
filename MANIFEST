@@ -4,10 +4,12 @@ examples/demo-border.pl
 examples/demo-button.pl
 examples/demo-entry.pl
 examples/demo-frame.pl
+examples/demo-gridbox.pl
 lib/Tickit/Widget/Border.pm
 lib/Tickit/Widget/Button.pm
 lib/Tickit/Widget/Entry.pm
 lib/Tickit/Widget/Frame.pm
+lib/Tickit/Widget/GridBox.pm
 lib/Tickit/Widgets.pm
 LICENSE
 Makefile.PL
@@ -22,4 +24,5 @@ t/03widget-entry-scroll.t
 t/10widget-button.t
 t/20widget-frame.t
 t/21widget-border.t
+t/23widget-gridbox.t
 t/99pod.t

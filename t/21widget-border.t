@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 13;
+use Test::More;
 use Test::Identity;
 
 use Tickit::Test;
@@ -20,7 +20,7 @@ ok( defined $widget, 'defined $widget' );
 
 is( scalar $widget->children, 0, '$widget has 0 children' );
 
-$widget->add( $static );
+$widget->set_child( $static );
 
 is( scalar $widget->children, 1, '$widget has 1 child after adding' );
 identical( $widget->child, $static, '$widget->child is $static' );
@@ -66,7 +66,7 @@ flush_tickit;
 is_display( [ BLANKLINES(25) ],
             'Display blank before late adding of child' );
 
-$widget->add( $static );
+$widget->set_child( $static );
 
 flush_tickit;
 
@@ -76,3 +76,5 @@ is_display( [ [TEXT("Widget")] ],
 $widget->set_window( undef );
 
 ok( !defined $static->window, '$static has no window after ->set_window undef' );
+
+done_testing;

@@ -16,12 +16,12 @@
    "prereqs" : {
       "build" : {
          "requires" : {
-            "Test::More" : "0"
+            "Test::More" : "0.88"
          }
       },
       "runtime" : {
          "requires" : {
-            "Tickit::Utils" : "0",
+            "Tickit::Utils" : "0.29",
             "Tickit::Widget" : "0"
          }
       }
@@ -29,11 +29,11 @@
    "provides" : {
       "Tickit::Widget::Border" : {
          "file" : "lib/Tickit/Widget/Border.pm",
-         "version" : "0.03"
+         "version" : "0.04"
       },
       "Tickit::Widget::Button" : {
          "file" : "lib/Tickit/Widget/Button.pm",
-         "version" : "0.03"
+         "version" : "0.04"
       },
       "Tickit::Widget::Entry" : {
          "file" : "lib/Tickit/Widget/Entry.pm",
@@ -43,9 +43,13 @@
          "file" : "lib/Tickit/Widget/Frame.pm",
          "version" : "0.24"
       },
+      "Tickit::Widget::GridBox" : {
+         "file" : "lib/Tickit/Widget/GridBox.pm",
+         "version" : "0.04"
+      },
       "Tickit::Widgets" : {
          "file" : "lib/Tickit/Widgets.pm",
-         "version" : "0.03"
+         "version" : "0.04"
       }
    },
    "release_status" : "stable",
@@ -54,5 +58,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.03"
+   "version" : "0.04"
 }

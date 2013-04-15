@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 65;
+use Test::More;
 
 use Tickit::Test;
 
@@ -244,3 +244,5 @@ is( $entry->find_eow_forward( 15 ), 17,    'find_eow_forward( 15 )' );
 
 is( $entry->find_bow_backward( 2 ), 0,     'find_bow_backward( 2 )' );
 is( $entry->find_eow_backward( 2 ), undef, 'find_eow_backward( 2 )' );
+
+done_testing;

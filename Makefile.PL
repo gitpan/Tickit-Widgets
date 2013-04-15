@@ -5,8 +5,8 @@ WriteMakefile
   'NAME' => 'Tickit::Widgets',
   'VERSION_FROM' => 'lib/Tickit/Widgets.pm',
   'PREREQ_PM' => {
-                   'Test::More' => 0,
-                   'Tickit::Utils' => 0,
+                   'Test::More' => '0.88',
+                   'Tickit::Utils' => '0.29',
                    'Tickit::Widget' => 0
                  },
   'INSTALLDIRS' => 'site',

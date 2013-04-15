@@ -3,7 +3,7 @@ abstract: 'load several L<Tickit::Widget> classes at once'
 author:
   - 'Paul Evans <leonerd@leonerd.org.uk>'
 build_requires:
-  Test::More: 0
+  Test::More: 0.88
 dynamic_config: 1
 generated_by: 'Module::Build version 0.4001, CPAN::Meta::Converter version 2.120921'
 license: perl
@@ -14,22 +14,25 @@ name: Tickit-Widgets
 provides:
   Tickit::Widget::Border:
     file: lib/Tickit/Widget/Border.pm
-    version: 0.03
+    version: 0.04
   Tickit::Widget::Button:
     file: lib/Tickit/Widget/Button.pm
-    version: 0.03
+    version: 0.04
   Tickit::Widget::Entry:
     file: lib/Tickit/Widget/Entry.pm
     version: 0.19
   Tickit::Widget::Frame:
     file: lib/Tickit/Widget/Frame.pm
     version: 0.24
+  Tickit::Widget::GridBox:
+    file: lib/Tickit/Widget/GridBox.pm
+    version: 0.04
   Tickit::Widgets:
     file: lib/Tickit/Widgets.pm
-    version: 0.03
+    version: 0.04
 requires:
-  Tickit::Utils: 0
+  Tickit::Utils: 0.29
   Tickit::Widget: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.03
+version: 0.04

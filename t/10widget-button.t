@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 9;
+use Test::More;
 
 use Tickit::Test;
 
@@ -54,3 +54,5 @@ is_display( [ [TEXT("+-------------+")],
             'Display after mouse release' );
 
 is( $clicked, 1, '$clicked after mouse release' );
+
+done_testing;

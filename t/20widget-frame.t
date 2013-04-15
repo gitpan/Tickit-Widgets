@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 10;
+use Test::More;
 use Test::Identity;
 
 use Tickit::Test;
@@ -93,3 +93,5 @@ is_display( [ [TEXT("+".("-"x71)." Title +",fg=>1)],
 $widget->set_window( undef );
 
 ok( !defined $static->window, '$static has no window after ->set_window undef' );
+
+done_testing;

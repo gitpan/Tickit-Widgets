@@ -1,5 +1,8 @@
 Revision history for Tickit-Widgets
 
+0.04    CHANGES:
+         * Added Tickit::Widget::GridBox
+
 0.03    CHANGES:
          * Added Tickit::Widget::Frame (copy from Tickit dist)
          * Added Tickit::Widget::Border (copy of Tickit::Widget::Box in

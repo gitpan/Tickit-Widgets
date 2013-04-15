@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 15;
+use Test::More;
 
 use Tickit::Test;
 
@@ -115,3 +115,5 @@ is_display( [ ("A"x69).("B"x11) ],
             'Display after ->text_delete 0, 1' );
 
 is_cursorpos( 0, 0, 'Position after ->text_delete 0, 1' );
+
+done_testing;

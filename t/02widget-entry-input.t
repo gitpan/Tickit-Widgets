@@ -2,7 +2,7 @@
 
 use strict;
 
-use Test::More tests => 35;
+use Test::More;
 use Test::Identity;
 
 use Tickit::Test;
@@ -133,3 +133,5 @@ presskey( key => "Enter" );
 is( $line, "nitial", 'on_enter $_[1] is line' );
 is_termlog( [],
             'Termlog unmodified after Enter' );
+
+done_testing;
