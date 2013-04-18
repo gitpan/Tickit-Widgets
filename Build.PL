@@ -5,6 +5,7 @@ use Module::Build;
 
 my $build = Module::Build->new(
    module_name => 'Tickit::Widgets',
+   dist_abstract => "a collection of Tickit::Widget implementations",
    requires => {
       'Tickit::Utils' => '0.29',
       'Tickit::Widget' => 0,

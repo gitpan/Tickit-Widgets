@@ -21,8 +21,4 @@ foreach my $style ( qw( ascii single double thick solid_inside solid_outside ) )
    $frame->frame_pen->chattr( fg => $fg++ );
 }
 
-my $tickit = Tickit->new();
-
-$tickit->set_root_widget( $vbox );
-
-$tickit->run;
+Tickit->new( root => $vbox )->run;

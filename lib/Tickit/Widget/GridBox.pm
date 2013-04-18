@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use base qw( Tickit::ContainerWidget );
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Carp;
 
@@ -29,8 +29,6 @@ C<Tickit::Widget::GridBox> - lay out a set of child widgets in a grid
  use Tickit::Widget::GridBox;
  use Tickit::Widget::Static;
 
- my $tickit = Tickit->new;
-
  my $gridbox = Tickit::Widget::GridBox->new(
     col_spacing => 2,
     row_spacing => 1,
@@ -43,7 +41,7 @@ C<Tickit::Widget::GridBox> - lay out a set of child widgets in a grid
 
  $tickit->set_row_spacing( $gridbox );
 
- $tickit->run;
+ Tickit->new( root => $gridbox )->run;
 
 =head1 DESCRIPTION
 

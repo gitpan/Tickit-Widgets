@@ -28,9 +28,7 @@ C<Tickit::Widget::Frame> - draw a frame around another widget
  use Tickit;
  use Tickit::Widget::Frame;
  use Tickit::Widget::Static;
- 
- my $tickit = Tickit->new;
- 
+
  my $hello = Tickit::Widget::Static->new(
     text   => "Hello, world",
     align  => "centre",
@@ -40,10 +38,8 @@ C<Tickit::Widget::Frame> - draw a frame around another widget
  my $frame = Tickit::Widget::Frame->new;
 
  $frame->add( $hello );
- 
- $tickit->set_root_widget( $frame );
- 
- $tickit->run;
+
+ Tickit->new( root => $frame )->run;
 
 =head1 DESCRIPTION
 

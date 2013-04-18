@@ -1,5 +1,12 @@
 Revision history for Tickit-Widgets
 
+0.05    CHANGES:
+         * Added Tickit::Widget::RadioButton
+         * Added Tickit::Widget::CheckButton
+         * Neater SYNOPSIS examples
+         * Set dist_abstract to more accurately reflect the distribution as a
+           whole
+
 0.04    CHANGES:
          * Added Tickit::Widget::GridBox
 

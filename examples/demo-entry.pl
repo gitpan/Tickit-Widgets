@@ -30,8 +30,4 @@ $entry->set_on_enter( sub {
    $_[0]->set_text( "" );
 } );
 
-my $tickit = Tickit->new();
-
-$tickit->set_root_widget( $vbox );
-
-$tickit->run;
+Tickit->new( root => $vbox )->run;

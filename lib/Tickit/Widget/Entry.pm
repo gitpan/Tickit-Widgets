@@ -26,9 +26,7 @@ C<Tickit::Widget::Entry> - a widget for entering text
 
  use Tickit;
  use Tickit::Widget::Entry;
- 
- my $tickit = Tickit->new;
- 
+
  my $entry = Tickit::Widget::Entry->new(
     on_enter => sub {
        my ( $self, $line ) = @_;
@@ -38,10 +36,8 @@ C<Tickit::Widget::Entry> - a widget for entering text
        $self->set_text( "" );
     },
  );
- 
- $tickit->set_root_widget( $entry );
- 
- $tickit->run;
+
+ Tickit->new( root => $entry )->run;
 
 =head1 DESCRIPTION
 

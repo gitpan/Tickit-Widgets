@@ -18,6 +18,4 @@ my $box = Tickit::Widget::Border->new(
    ),
 );
 
-my $tickit = Tickit->new;
-$tickit->set_root_widget( $box );
-$tickit->run;
+Tickit->new( root => $box )->run;

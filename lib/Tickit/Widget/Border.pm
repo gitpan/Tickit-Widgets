@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::SingleChildWidget );
 use Tickit::WidgetRole::Borderable;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 NAME
 
@@ -21,9 +21,7 @@ C<Tickit::Widget::Border> - draw a fixed-size border around a widget
  use Tickit;
  use Tickit::Widget::Border;
  use Tickit::Widget::Static;
- 
- my $tickit = Tickit->new;
- 
+
  my $hello = Tickit::Widget::Static->new(
     text   => "Hello, world",
     align  => "centre",
@@ -33,10 +31,8 @@ C<Tickit::Widget::Border> - draw a fixed-size border around a widget
  my $border = Tickit::Widget::Border->new;
 
  $border->set_child( $hello );
- 
- $tickit->set_root_widget( $border );
- 
- $tickit->run;
+
+ Tickit->new( root => $border )->run;
 
 =head1 DESCRIPTION
 

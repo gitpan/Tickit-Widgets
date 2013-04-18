@@ -7,8 +7,6 @@ use Tickit;
 
 use Tickit::Widgets qw( Box Button VBox );
 
-my $t = Tickit->new;
-
 my $box = Tickit::Widget::Box->new(
    h_border => 10,
    v_border => 4,
@@ -24,13 +22,13 @@ foreach my $colour (qw( red blue green yellow )) {
    );
 }
 
+my $tickit = Tickit->new( root => $box );
+
 $vbox->add(
    Tickit::Widget::Button->new(
       label => "Quit",
-      on_click => sub { $t->stop },
+      on_click => sub { $tickit->stop },
    )
 );
 
-$t->set_root_widget( $box );
-
-$t->run;
+$tickit->run;

@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use base qw( Tickit::Widget );
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Tickit::Utils qw( textwidth );
 
@@ -23,9 +23,7 @@ C<Tickit::Widget::Button> - a widget displaying a clickable button
 
  use Tickit;
  use Tickit::Widget::Button;
- 
- my $tickit = Tickit->new;
- 
+
  my $button = Tickit::Widget::Button->new(
     label => "Click Me!",
     on_click => sub {
@@ -34,10 +32,8 @@ C<Tickit::Widget::Button> - a widget displaying a clickable button
        # Do something!
     },
  );
- 
- $tickit->set_root_widget( $button );
- 
- $tickit->run;
+
+ Tickit->new( root => $button )->run;
 
 =head1 DESCRIPTION
 

@@ -26,8 +26,4 @@ foreach my $row ( 0 .. 9 ) {
    }
 }
 
-my $tickit = Tickit->new();
-
-$tickit->set_root_widget( $gridbox );
-
-$tickit->run;
+Tickit->new( root => $gridbox )->run;
