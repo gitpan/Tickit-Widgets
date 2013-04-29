@@ -1,17 +1,25 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2011-2012 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2011-2013 -- leonerd@leonerd.org.uk
 
 package Tickit::Widget::Entry;
 
 use strict;
 use warnings;
 use base qw( Tickit::Widget );
+use Tickit::Style;
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 use Tickit::Utils qw( textwidth chars2cols cols2chars substrwidth );
+
+style_definition base =>
+   more_fg    => "cyan",
+   more_left  => "<..",
+   more_right => "..>";
+
+use constant WIDGET_PEN_FROM_STYLE => 1;
 
 # Positions in this code can get complicated. The following conventions apply:
 #   $pos_ch  = a position in CHaracters within a Unicode string (length, substr,..)
@@ -42,6 +50,32 @@ C<Tickit::Widget::Entry> - a widget for entering text
 =head1 DESCRIPTION
 
 This class provides a widget which allows the user to enter a line of text.
+
+=head1 STYLE
+
+The default style pen is used as the widget pen. The following style pen
+prefixes are also used:
+
+=over 4
+
+=item more => PEN
+
+The pen used for the "more" scroll markers
+
+=back
+
+The following style keys are used:
+
+=over 4
+
+=item more_left => STRING
+
+=item more_right => STRING
+
+The text used to indicate that there is more content scrolled to the left or
+right, respectively
+
+=back
 
 =cut
 
@@ -180,9 +214,6 @@ sub new
 
    $self->set_on_enter( $params{on_enter} ) if defined $params{on_enter};
 
-   $self->{more_markers} = [ "<..", "..>" ];
-   $self->{more_pen} = Tickit::Pen->new( fg => "cyan" );
-
    return $self;
 }
 
@@ -202,7 +233,7 @@ sub pretext_width
    my $self = shift;
 
    return 0 if $self->{scrolloffs_co} == 0;
-   return textwidth( $self->{more_markers}[0] );
+   return textwidth( $self->get_style_values( "more_left" ) );
 }
 
 sub pretext_render
@@ -210,7 +241,7 @@ sub pretext_render
    my $self = shift;
    my ( $win ) = @_;
 
-   $win->print( $self->{more_markers}[0], $self->{more_pen} );
+   $win->print( $self->get_style_values( "more_left" ), $self->get_style_pen( "more" ) );
 }
 
 sub posttext_width
@@ -218,7 +249,7 @@ sub posttext_width
    my $self = shift;
 
    return 0 if textwidth( $self->text ) <= $self->{scrolloffs_co} + $self->window->cols;
-   return textwidth( $self->{more_markers}[1] );
+   return textwidth( $self->get_style_values( "more_right" ) );
 }
 
 sub posttext_render
@@ -226,11 +257,10 @@ sub posttext_render
    my $self = shift;
    my ( $win ) = @_;
 
-   $win->print( $self->{more_markers}[1], $self->{more_pen} );
+   $win->print( $self->get_style_values( "more_right" ), $self->get_style_pen( "more" ) );
 }
 
 use constant CLEAR_BEFORE_RENDER => 0;
-
 sub render
 {
    my $self = shift;
@@ -376,7 +406,7 @@ sub _text_spliced
    }
 
    if( $delta_co < 0 and $self->{scrolloffs_co} + $width < textwidth $self->text ) {
-      my $marker = $self->{more_markers}[1];
+      my $marker = $self->get_style_values( "more_right" );
       my $damagewidth = -$delta_co + textwidth $marker;
 
       my $rhs_x  = $width - $damagewidth;

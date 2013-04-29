@@ -7,7 +7,7 @@ WriteMakefile
   'PREREQ_PM' => {
                    'Test::More' => '0.88',
                    'Tickit::Utils' => '0.29',
-                   'Tickit::Widget' => 0
+                   'Tickit::Widget' => '0.30'
                  },
   'INSTALLDIRS' => 'site',
   'EXE_FILES' => [],

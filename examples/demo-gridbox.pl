@@ -4,9 +4,7 @@ use strict;
 use warnings;
 
 use Tickit;
-
-use Tickit::Widget::Static;
-use Tickit::Widget::GridBox;
+use Tickit::Widgets qw( Static GridBox );
 
 my $gridbox = Tickit::Widget::GridBox->new(
    row_spacing => 1,

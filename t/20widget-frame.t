@@ -18,8 +18,6 @@ my $widget = Tickit::Widget::Frame->new;
 
 ok( defined $widget, 'defined $widget' );
 
-is( $widget->style, "ascii", '$widget->style' );
-
 $widget->add( $static );
 $widget->set_window( $win );
 
@@ -36,7 +34,7 @@ is_display( [ [TEXT("+".("-"x78)."+")],
 SKIP: {
    skip "No UTF-8 locale", 1 unless ${^UTF8LOCALE};
 
-   $widget->set_style( "single" );
+   $widget->set_style( linetype => "single" );
 
    flush_tickit;
 
@@ -44,11 +42,11 @@ SKIP: {
                  [TEXT("\x{2502}Widget".(" "x72)."\x{2502}")],
                  ( [TEXT("\x{2502}"), BLANK(78), TEXT("\x{2502}")] ) x 22,
                  [TEXT("\x{2514}".("\x{2500}"x78)."\x{2518}")] ],
-               'Display after ->set_style' );
+               'Display after ->set_style(linetype)' );
 }
 
-# That style is hard to test against so put it back to ASCII
-$widget->set_style( "ascii" );
+# That linetype is hard to test against so put it back to ASCII
+$widget->set_style( linetype => "ascii" );
 
 $widget->set_title( "Title" );
 
@@ -70,7 +68,7 @@ is_display( [ [TEXT("+".("-"x71)." Title +")],
               [TEXT("+".("-"x78)."+")] ],
             'Display with right-aligned title' );
 
-$widget->frame_pen->chattr( fg => "red" );
+$widget->set_style( frame_fg => "red" );
 
 flush_tickit;
 

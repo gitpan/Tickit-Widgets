@@ -1,23 +1,28 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2011-2012 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2011-2013 -- leonerd@leonerd.org.uk
 
 package Tickit::Widget::Frame;
 
 use strict;
 use warnings;
 use base qw( Tickit::SingleChildWidget );
+use Tickit::Style;
 
 use Tickit::WidgetRole::Alignable name => "title_align";
-use Tickit::WidgetRole::Penable name => "frame";
 
-our $VERSION = '0.24';
+our $VERSION = '0.25';
 
 use Carp;
 
 use Tickit::Pen;
 use Tickit::Utils qw( textwidth substrwidth );
+
+style_definition base =>
+   linetype => "ascii";
+
+use constant WIDGET_PEN_FROM_STYLE => 1;
 
 =head1 NAME
 
@@ -45,6 +50,36 @@ C<Tickit::Widget::Frame> - draw a frame around another widget
 
 This container widget draws a frame around a single child widget.
 
+=head1 STYLE
+
+The default style pen is used as the widget pen. The following style pen
+prefixes are also used:
+
+=over 4
+
+=item frame => PEN
+
+The pen used to render the frame lines
+
+=back
+
+The following style keys are used:
+
+=over 4
+
+=item linetype => STRING
+
+Controls the type of line characters used to draw the frame. Must be one of
+the following names:
+
+ ascii single double thick solid_inside solid_outside
+
+The C<ascii> linetype is default, and uses only the C<-|+> ASCII characters.
+Other linetypes use Unicode box-drawing characters. These may not be supported
+by all terminals or fonts.
+
+=back
+
 =cut
 
 =head1 CONSTRUCTOR
@@ -59,10 +94,6 @@ Takes the following named arguments in addition to those taken by the base
 L<Tickit::SingleChildWidget> constructor:
 
 =over 8
-
-=item style => STRING
-
-Optional. Defaults to C<ascii> if unspecified.
 
 =item title => STRING
 
@@ -83,10 +114,14 @@ sub new
    my $class = shift;
    my %args = @_;
 
+   # Previously 'linetype' was called 'style', but it collided with
+   # Tickit::Widget's idea of style
+   if( defined $args{style} and !ref $args{style} ) {
+      $args{style} = { linetype => delete $args{style} };
+   }
+
    my $self = $class->SUPER::new( %args );
 
-   $self->set_style( $args{style} || "ascii" );
-   $self->_init_frame_pen;
    $self->set_title( $args{title} ) if defined $args{title};
    $self->set_title_align( $args{title_align} || 0 );
 
@@ -125,7 +160,7 @@ use constant {
 # Character numbers from
 #   http://en.wikipedia.org/wiki/Box-drawing_characters
 
-my %STYLES = ( #               TOP     BOTTOM  LEFT    RIGHT   TL      TR      BL      BR
+my %LINECHARS = ( #            TOP     BOTTOM  LEFT    RIGHT   TL      TR      BL      BR
    ascii         => [          '-',    '-',    '|',    '|',    '+',    '+',    '+',    '+' ],
    single        => [ map chr, 0x2500, 0x2500, 0x2502, 0x2502, 0x250C, 0x2510, 0x2514, 0x2518 ],
    double        => [ map chr, 0x2550, 0x2550, 0x2551, 0x2551, 0x2554, 0x2557, 0x255A, 0x255D ],
@@ -134,64 +169,48 @@ my %STYLES = ( #               TOP     BOTTOM  LEFT    RIGHT   TL      TR      B
    solid_outside => [ map chr, 0x2580, 0x2584, 0x258C, 0x2590, 0x259B, 0x259C, 0x2599, 0x259F ],
 );
 
-=head2 $style = $frame->style
+=head2 $linetype = $frame->linetype
 
 =cut
+
+sub linetype
+{
+   my $self = shift;
+   return scalar $self->get_style_values( "linetype" );
+}
+
+# Legacy but undocumented wrappers for the old name of the attribute
 
 sub style
 {
    my $self = shift;
-   return $self->{style};
+   return $self->linetype;
 }
-
-=head2 $frame->set_style( $style )
-
-Accessor for the C<style> property, which controls the way the actual frame is
-drawn around the inner widget. Must be one of the following names:
-
- ascii single double thick solid_inside solid_outside
-
-The C<ascii> style is default, and uses only the C<-|+> ASCII characters.
-Other styles use Unicode box-drawing characters. These may not be supported by
-all terminals or fonts.
-
-=cut
 
 sub set_style
 {
    my $self = shift;
-
-   exists $STYLES{$_[0]} or croak "Cannot set Frame style to '$_[0]'";
-
-   $self->{style} = $_[0];
-   $self->redraw;
-}
-
-=head2 $frame_pen = $widget->frame_pen
-
-Returns the current frame pen. Modifying an attribute of the returned object
-results in the widget being redrawn if the widget has a window associated.
-
-=cut
-
-=head2 $widget->set_frame_pen( $pen )
-
-Set a new C<Tickit::Pen> object. This is stored by reference; changes to the
-pen will be reflected in the rendered look of the frame. The same pen may be
-shared by more than one widget; updates will affect them all.
-
-=cut
-
-sub on_pen_changed
-{
-   my $self = shift;
-   my ( $pen ) = @_;
-
-   if( $self->window and $pen == $self->frame_pen ) {
-      $self->redraw;
+   if( @_ == 1 ) {
+      $self->SUPER::set_style( linetype => $_[0] );
    }
    else {
-      $self->SUPER::on_pen_changed( @_ );
+      $self->SUPER::set_style( @_ );
+   }
+}
+
+sub on_style_changed_values
+{
+   my $self = shift;
+   my %values = @_;
+
+   # TODO: We can put some of this logic in Tickit::Widget
+   exists $values{"frame_$_"} and $self->redraw, return for @Tickit::Pen::ALL_ATTRS;
+
+   foreach (qw( linetype )) {
+      next if !$values{$_};
+
+      $self->redraw;
+      return;
    }
 }
 
@@ -205,7 +224,7 @@ sub title
    return $self->{title};
 }
 
-=head2 $frame->title( $title )
+=head2 $frame->set_title( $title )
 
 Accessor for the C<title> property, a string written in the top of the
 frame.
@@ -260,7 +279,6 @@ sub set_child_window
 }
 
 use constant CLEAR_BEFORE_RENDER => 0;
-
 sub render
 {
    my $self = shift;
@@ -273,9 +291,9 @@ sub render
    my $cols  = $win->cols;
    my $lines = $win->lines;
 
-   my $style = $STYLES{$self->{style}};
+   my $linechars = $LINECHARS{$self->linetype};
 
-   my $framepen = $self->frame_pen;
+   my $framepen = $self->get_style_pen( "frame" );
 
    foreach my $line ( $rect->linerange ) {
       $win->goto( $line, 0 );
@@ -286,32 +304,32 @@ sub render
             # At most we can fit $cols-4 columns of title
             my ( $left, $titlewidth, $right ) = $self->_title_align_allocation( textwidth( $title ), $cols - 4 );
 
-            $win->print( $style->[CORNER_TL] . ( $style->[TOP] x $left ) . " ", $framepen );
+            $win->print( $linechars->[CORNER_TL] . ( $linechars->[TOP] x $left ) . " ", $framepen );
             $win->print( $title, $framepen );
-            $win->print( " " . ( $style->[TOP] x $right ) . $style->[CORNER_TR], $framepen ) if $cols > 1;
+            $win->print( " " . ( $linechars->[TOP] x $right ) . $linechars->[CORNER_TR], $framepen ) if $cols > 1;
          }
          else {
-            my $str = $style->[CORNER_TL];
-            $str .= $style->[TOP] x ($cols - 2) if $cols > 2;
-            $str .= $style->[CORNER_TR] if $cols > 1;
+            my $str = $linechars->[CORNER_TL];
+            $str .= $linechars->[TOP] x ($cols - 2) if $cols > 2;
+            $str .= $linechars->[CORNER_TR] if $cols > 1;
 
             $win->print( $str, $framepen );
          }
       }
       elsif( $line < $lines - 1 ) {
          # Middle line
-         $win->print( $style->[LEFT], $framepen );
+         $win->print( $linechars->[LEFT], $framepen );
 
          next if $cols == 1;
 
          $win->goto( $line, $cols - 1 );
-         $win->print( $style->[RIGHT], $framepen );
+         $win->print( $linechars->[RIGHT], $framepen );
       }
       else {
          # Bottom line
-         my $str = $style->[CORNER_BL];
-         $str .= $style->[BOTTOM] x ($cols - 2) if $cols > 2;
-         $str .= $style->[CORNER_BR] if $cols > 1;
+         my $str = $linechars->[CORNER_BL];
+         $str .= $linechars->[BOTTOM] x ($cols - 2) if $cols > 2;
+         $str .= $linechars->[CORNER_BR] if $cols > 1;
 
          $win->print( $str, $framepen );
       }

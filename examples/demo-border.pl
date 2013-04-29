@@ -4,11 +4,9 @@ use strict;
 use warnings;
 
 use Tickit;
+use Tickit::Widgets qw( Border Static );
 
-use Tickit::Widget::Border;
-use Tickit::Widget::Static;
-
-my $box = Tickit::Widget::Border->new(
+my $border = Tickit::Widget::Border->new(
    h_border => 4, v_border => 2,
    bg => "green",
    child => Tickit::Widget::Static->new(
@@ -18,4 +16,4 @@ my $box = Tickit::Widget::Border->new(
    ),
 );
 
-Tickit->new( root => $box )->run;
+Tickit->new( root => $border )->run;

@@ -1,5 +1,10 @@
 Revision history for Tickit-Widgets
 
+0.06    CHANGES:
+         * Use new WIDGET_PEN_FROM_STYLE from Tickit 0.30
+         * Update widgets to use more Tickit::Style behaviour
+         * Renamed Tickit::Widget::Frame's "style" attribute to "linetype"
+
 0.05    CHANGES:
          * Added Tickit::Widget::RadioButton
          * Added Tickit::Widget::CheckButton

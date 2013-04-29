@@ -4,18 +4,13 @@ use strict;
 use warnings;
 
 use Tickit;
-
-use Tickit::Widget::Static;
-use Tickit::Widget::Entry;
-
-use Tickit::Widget::Box;
-use Tickit::Widget::VBox;
+use Tickit::Widgets qw( Static Entry Border VBox );
 
 my $vbox = Tickit::Widget::VBox->new( spacing => 1 );
 
 $vbox->add( Tickit::Widget::Static->new( text => "Enter some text here:" ) );
 
-$vbox->add( Tickit::Widget::Box->new(
+$vbox->add( Tickit::Widget::Border->new(
    h_border => 2,
    v_border => 1,
    bg => 'blue',

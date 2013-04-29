@@ -1,19 +1,20 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2012 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2012-2013 -- leonerd@leonerd.org.uk
 
 package Tickit::Widget::Button;
 
 use strict;
 use warnings;
 use base qw( Tickit::Widget );
+use Tickit::Style;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use Tickit::Utils qw( textwidth );
 
-use constant CLEAR_BEFORE_RENDER => 0;
+use constant WIDGET_PEN_FROM_STYLE => 1;
 
 =head1 NAME
 
@@ -39,6 +40,10 @@ C<Tickit::Widget::Button> - a widget displaying a clickable button
 
 This class provides a widget which displays a clickable area with a label.
 When the area is clicked, a callback is invoked.
+
+=head1 STYLE
+
+The default style pen is used as the widget pen.
 
 =cut
 
@@ -159,6 +164,7 @@ the button area. See also L<Tickit::WidgetRole::Alignable>.
 use Tickit::WidgetRole::Alignable name => "align",  style => "h";
 use Tickit::WidgetRole::Alignable name => "valign", style => "v";
 
+use constant CLEAR_BEFORE_RENDER => 0;
 sub render
 {
    my $self = shift;

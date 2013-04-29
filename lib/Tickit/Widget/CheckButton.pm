@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use Carp;
 
@@ -93,6 +93,8 @@ style_definition ':active' =>
    b        => 1,
    check    => "[X]";
 
+use constant WIDGET_PEN_FROM_STYLE => 1;
+
 =head1 CONSTRUCTOR
 
 =cut
@@ -118,24 +120,11 @@ sub new
    my $class = shift;
    my %args = @_;
 
-   # Move legacy pen attributes to style
-   $args{$_} and $args{style}{$_} = delete $args{$_} for @Tickit::Pen::ALL_ATTRS;
-
    my $self = $class->SUPER::new( %args );
 
    $self->{label} = $args{label};
 
-   $self->SUPER::set_pen( $self->get_style_pen );
-
    return $self;
-}
-
-sub set_pen
-{
-   my $self = shift;
-   return $self->SUPER::set_pen( @_ ) if caller eq "Tickit::Widget";
-
-   croak __PACKAGE__." uses Tickit::Style for its widget pen; the pen cannot be directly set";
 }
 
 sub lines
@@ -182,8 +171,6 @@ sub on_style_changed_values
 {
    my $self = shift;
    my %values = @_;
-
-   $self->SUPER::set_pen( $self->get_style_pen ) if any { $values{$_} } @Tickit::Pen::ALL_ATTRS;
 
    foreach (qw( spacing )) {
       next if !$values{$_};

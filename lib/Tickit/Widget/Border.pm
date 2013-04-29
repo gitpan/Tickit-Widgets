@@ -1,16 +1,19 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2011-2012 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2011-2013 -- leonerd@leonerd.org.uk
 
 package Tickit::Widget::Border;
 
 use strict;
 use warnings;
 use base qw( Tickit::SingleChildWidget );
+use Tickit::Style;
 use Tickit::WidgetRole::Borderable;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
+
+use constant WIDGET_PEN_FROM_STYLE => 1;
 
 =head1 NAME
 
@@ -38,6 +41,10 @@ C<Tickit::Widget::Border> - draw a fixed-size border around a widget
 
 This container widget holds a single child widget and implements a border by
 using L<Tickit::WidgetRole::Borderable>.
+
+=head1 STYLE
+
+The default style pen is used as the widget pen.
 
 =cut
 
@@ -99,7 +106,6 @@ sub set_child_window
 }
 
 use constant CLEAR_BEFORE_RENDER => 0;
-
 sub render
 {
    my $self = shift;

@@ -8,8 +8,9 @@ package Tickit::Widget::GridBox;
 use strict;
 use warnings;
 use base qw( Tickit::ContainerWidget );
+use Tickit::Style;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use Carp;
 
@@ -17,7 +18,7 @@ use Tickit::Utils 0.29 qw( distribute );
 
 use List::Util qw( sum max );
 
-use constant CLEAR_BEFORE_RENDER => 0;
+use constant WIDGET_PEN_FROM_STYLE => 1;
 
 =head1 NAME
 
@@ -47,6 +48,10 @@ C<Tickit::Widget::GridBox> - lay out a set of child widgets in a grid
 
 This container widget holds a set of child widgets distributed in a regular
 grid shape across rows and columns.
+
+=head1 STYLE
+
+The default style pen is used as the widget pen.
 
 =cut
 
@@ -350,12 +355,19 @@ sub redistribute_child_windows
    }
 }
 
+use constant CLEAR_BEFORE_RENDER => 0;
 sub render
 {
    my $self = shift;
-   my $win = $self->window or return;
+   my %args = @_;
 
-   $win->clear;
+   my $win = $self->window or return;
+   my $rect = $args{rect};
+
+   foreach my $line ( $rect->linerange ) {
+      $win->goto( $line, $rect->left );
+      $win->erasech( $rect->cols );
+   }
 }
 
 =head1 AUTHOR

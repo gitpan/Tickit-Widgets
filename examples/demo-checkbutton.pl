@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 
+use Tickit;
 use Tickit::Widgets qw( VBox CheckButton );
 
 my $vbox = Tickit::Widget::VBox->new( spacing => 1 );
