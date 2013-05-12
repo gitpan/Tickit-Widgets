@@ -21,6 +21,8 @@
       },
       "runtime" : {
          "requires" : {
+            "Tickit::RenderContext" : "0.07",
+            "Tickit::Style" : "0.32",
             "Tickit::Utils" : "0.29",
             "Tickit::Widget" : "0.30"
          }
@@ -29,35 +31,47 @@
    "provides" : {
       "Tickit::Widget::Border" : {
          "file" : "lib/Tickit/Widget/Border.pm",
-         "version" : "0.06"
+         "version" : "0.07"
       },
       "Tickit::Widget::Button" : {
          "file" : "lib/Tickit/Widget/Button.pm",
-         "version" : "0.06"
+         "version" : "0.07"
       },
       "Tickit::Widget::CheckButton" : {
          "file" : "lib/Tickit/Widget/CheckButton.pm",
-         "version" : "0.06"
+         "version" : "0.07"
       },
       "Tickit::Widget::Entry" : {
          "file" : "lib/Tickit/Widget/Entry.pm",
-         "version" : "0.20"
+         "version" : "0.21"
       },
       "Tickit::Widget::Frame" : {
          "file" : "lib/Tickit/Widget/Frame.pm",
-         "version" : "0.25"
+         "version" : "0.26"
       },
       "Tickit::Widget::GridBox" : {
          "file" : "lib/Tickit/Widget/GridBox.pm",
-         "version" : "0.06"
+         "version" : "0.07"
+      },
+      "Tickit::Widget::HSplit" : {
+         "file" : "lib/Tickit/Widget/HSplit.pm",
+         "version" : "0.07"
+      },
+      "Tickit::Widget::LinearSplit" : {
+         "file" : "lib/Tickit/Widget/LinearSplit.pm",
+         "version" : "0.07"
       },
       "Tickit::Widget::RadioButton" : {
          "file" : "lib/Tickit/Widget/RadioButton.pm",
-         "version" : "0.06"
+         "version" : "0.07"
+      },
+      "Tickit::Widget::VSplit" : {
+         "file" : "lib/Tickit/Widget/VSplit.pm",
+         "version" : "0.07"
       },
       "Tickit::Widgets" : {
          "file" : "lib/Tickit/Widgets.pm",
-         "version" : "0.06"
+         "version" : "0.07"
       }
    },
    "release_status" : "stable",
@@ -66,5 +80,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.06"
+   "version" : "0.07"
 }

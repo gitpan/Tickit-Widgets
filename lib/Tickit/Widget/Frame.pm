@@ -12,17 +12,12 @@ use Tickit::Style;
 
 use Tickit::WidgetRole::Alignable name => "title_align";
 
-our $VERSION = '0.25';
+our $VERSION = '0.26';
 
 use Carp;
 
 use Tickit::Pen;
 use Tickit::Utils qw( textwidth substrwidth );
-
-style_definition base =>
-   linetype => "ascii";
-
-use constant WIDGET_PEN_FROM_STYLE => 1;
 
 =head1 NAME
 
@@ -81,6 +76,11 @@ by all terminals or fonts.
 =back
 
 =cut
+
+style_definition base =>
+   linetype => "ascii";
+
+use constant WIDGET_PEN_FROM_STYLE => 1;
 
 =head1 CONSTRUCTOR
 
@@ -249,10 +249,10 @@ See also L<Tickit::WidgetRole::Alignable>.
 
 =cut
 
-sub children_changed { shift->set_child_window }
-sub reshape          { shift->set_child_window }
+## This should come from Tickit::ContainerWidget
+sub children_changed { shift->reshape }
 
-sub set_child_window
+sub reshape
 {
    my $self = shift;
 

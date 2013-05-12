@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+use strict;
+use warnings;
+
 use Test::More;
 
 use_ok( 'Tickit::Widgets' );
@@ -10,6 +13,8 @@ use_ok( 'Tickit::Widget::CheckButton' );
 use_ok( 'Tickit::Widget::Entry' );
 use_ok( 'Tickit::Widget::Frame' );
 use_ok( 'Tickit::Widget::GridBox' );
+use_ok( 'Tickit::Widget::HSplit' );
 use_ok( 'Tickit::Widget::RadioButton' );
+use_ok( 'Tickit::Widget::VSplit' );
 
 done_testing;

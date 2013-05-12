@@ -9,8 +9,9 @@ use strict;
 use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
+use Tickit::RenderContext;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use Carp;
 
@@ -238,18 +239,23 @@ use constant CLEAR_BEFORE_RENDER => 0;
 sub render
 {
    my $self = shift;
+   my %args = @_;
    my $win = $self->window or return;
 
-   $win->goto( 0, 0 );
+   my $rc = Tickit::RenderContext->new( lines => $win->lines, cols => $win->cols );
+   $rc->clip( $args{rect} );
+   $rc->setpen( $self->pen );
 
-   my $col = 0;
-   $col += $win->print( $self->get_style_values( "check" ), $self->get_style_pen( "check" ) )->columns;
+   $rc->clear;
 
-   $col += $win->erasech( $self->get_style_values( "spacing" ), 1 )->columns;
+   $rc->goto( 0, 0 );
 
-   $col += $win->print( $self->{label} )->columns;
+   $rc->text( $self->get_style_values( "check" ), $self->get_style_pen( "check" ) );
+   $rc->erase( $self->get_style_values( "spacing" ) );
+   $rc->text( $self->{label} );
+   $rc->erase_to( $win->cols );
 
-   $win->erasech( $win->cols - $col ) if $col < $win->cols;
+   $rc->flush_to_window( $win );
 }
 
 sub on_mouse

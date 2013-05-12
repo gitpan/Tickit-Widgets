@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 
 use strict;
+use warnings;
+use utf8;
 
 use Test::More;
 
@@ -10,7 +12,7 @@ use Tickit::Widget::Button;
 
 my $root = mk_window;
 
-my $win = $root->make_sub( 0, 0, 3, 15 );
+my $win = $root->make_sub( 0, 0, 3, 14 );
 
 my $clicked = 0;
 my $button = Tickit::Widget::Button->new(
@@ -28,18 +30,18 @@ $button->set_window( $win );
 
 flush_tickit;
 
-is_display( [ [TEXT("+-------------+")],
-              [TEXT("|  Click me   |")],
-              [TEXT("+-------------+")] ],
+is_display( [ [TEXT("┌────────────┐")],
+              [TEXT("│  Click me  │")],
+              [TEXT("└────────────┘")] ],
             'Display initially' );
 
 pressmouse( press => 1, 1, 10 );
 
 flush_tickit;
 
-is_display( [ [TEXT("+-------------+")],
-              [TEXT("| >Click me<  |")],
-              [TEXT("+-------------+")] ],
+is_display( [ [TEXT("┌────────────┐")],
+              [TEXT("│▶ Click me ◀│")],
+              [TEXT("└────────────┘")] ],
             'Display after focus' );
 
 is( $clicked, 0, '$clicked before mouse release' );
@@ -48,9 +50,9 @@ pressmouse( release => 1, 1, 10 );
 
 flush_tickit;
 
-is_display( [ [TEXT("+-------------+")],
-              [TEXT("| >Click me<  |")],
-              [TEXT("+-------------+")] ],
+is_display( [ [TEXT("┌────────────┐")],
+              [TEXT("│▶ Click me ◀│")],
+              [TEXT("└────────────┘")] ],
             'Display after mouse release' );
 
 is( $clicked, 1, '$clicked after mouse release' );

@@ -7,8 +7,10 @@ use Tickit;
 use Tickit::Widgets qw( Static GridBox );
 
 my $gridbox = Tickit::Widget::GridBox->new(
-   row_spacing => 1,
-   col_spacing => 2,
+   style => {
+      row_spacing => 1,
+      col_spacing => 2,
+   },
 );
 
 foreach my $row ( 0 .. 9 ) {

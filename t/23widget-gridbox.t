@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
+use warnings;
 
 use Test::More;
 use Test::Identity;
@@ -38,8 +39,10 @@ is_display( [ [TEXT("Widget 0"), BLANK(32), TEXT("Widget 1"), BLANK(32)],
               BLANKLINES(12) ],
             'Display initially' );
 
-$widget->set_col_spacing( 10 );
-$widget->set_row_spacing( 3 );
+$widget->set_style(
+   col_spacing => 10,
+   row_spacing => 3,
+);
 
 flush_tickit;
 

@@ -9,12 +9,11 @@ use strict;
 use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
+use Tickit::RenderContext qw( LINE_SINGLE );
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use Tickit::Utils qw( textwidth );
-
-use constant WIDGET_PEN_FROM_STYLE => 1;
 
 =head1 NAME
 
@@ -46,6 +45,8 @@ When the area is clicked, a callback is invoked.
 The default style pen is used as the widget pen.
 
 =cut
+
+use constant WIDGET_PEN_FROM_STYLE => 1;
 
 =head1 CONSTRUCTOR
 
@@ -174,44 +175,37 @@ sub render
    $win->is_visible or return;
    my $rect = $args{rect};
 
+   my $lines = $win->lines;
+   my $cols  = $win->cols;
+   my $rc = Tickit::RenderContext->new( lines => $lines, cols => $cols );
+   $rc->clip( $rect );
+   $rc->setpen( $self->pen );
+
    my $label = $self->label;
    my $width = textwidth $label;
    my $focused = $win->is_focused;
 
-   my ( $lines_before, undef, $lines_after ) = $self->_valign_allocation( 1, $win->lines - 2 );
-   my $cols2 = $win->cols - 2;
-   my ( $cols_before, undef, $cols_after ) = $self->_align_allocation( $width + 2, $cols2 );
+   my ( $lines_before, undef, $lines_after ) = $self->_valign_allocation( 1, $lines - 2 );
+   my ( $cols_before, undef, $cols_after ) = $self->_align_allocation( $width + 2, $cols - 2 );
 
-   if( $rect->top == 0 ) {
-      $win->goto( 0, 0 );
-      $win->print( "+" . ( "-" x $cols2 ) . "+" );
-   }
-   for( $rect->top + 1 .. $lines_before ) {
-      $win->goto( $_, 0 );
-      $win->print( "|" );
-      $win->erasech( $cols2, 1 );
-      $win->print( "|" );
+   $rc->hline_at( 0,        0, $cols-1, LINE_SINGLE );
+   $rc->hline_at( $lines-1, 0, $cols-1, LINE_SINGLE );
+   $rc->vline_at( 0, $lines-1, 0,       LINE_SINGLE );
+   $rc->vline_at( 0, $lines-1, $cols-1, LINE_SINGLE );
+
+   foreach my $line ( 1 .. $lines-2 ) {
+      $rc->erase_at( $line, 1, $cols-2 );
    }
 
-   $win->goto( $lines_before + 1, 0 );
-   $win->print( "|" );
-   $win->erasech( $cols_before, 1 );
-   $win->print( $focused ? ">" : " " );
-   $win->print( $label );
-   $win->print( $focused ? "<" : " " );
-   $win->erasech( $cols_after, 1 );
-   $win->print( "|" );
+   my $label_line = $lines_before + 1;
+   $rc->text_at( $label_line, $cols_before + 2, $label );
 
-   for( $rect->bottom - $lines_after - 1 .. $rect->bottom - 2 ) {
-      $win->goto( $_, 0 );
-      $win->print( "|" );
-      $win->erasech( $cols2, 1 );
-      $win->print( "|" );
+   if( $focused ) {
+      $rc->char_at( $label_line, $cols_before, 0x25B6 ); # Black right-pointing triangle
+      $rc->char_at( $label_line, $cols-1 - $cols_after, 0x25C0 ); # Black left-pointing triangle
    }
-   if( $rect->bottom == $win->lines ) {
-      $win->goto( $rect->bottom - 1, 0 );
-      $win->print( "+" . ( "-" x $cols2 ) . "+" );
-   }
+
+   $rc->flush_to_window( $win );
 }
 
 sub on_mouse

@@ -9,16 +9,15 @@ use strict;
 use warnings;
 use base qw( Tickit::ContainerWidget );
 use Tickit::Style;
+use Tickit::RenderContext;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use Carp;
 
 use Tickit::Utils 0.29 qw( distribute );
 
 use List::Util qw( sum max );
-
-use constant WIDGET_PEN_FROM_STYLE => 1;
 
 =head1 NAME
 
@@ -31,8 +30,10 @@ C<Tickit::Widget::GridBox> - lay out a set of child widgets in a grid
  use Tickit::Widget::Static;
 
  my $gridbox = Tickit::Widget::GridBox->new(
-    col_spacing => 2,
-    row_spacing => 1,
+    style => {
+       col_spacing => 2,
+       row_spacing => 1,
+    },
  );
 
  $gridbox->add( 0, 0, Tickit::Widget::Static->new( text => "top left" ) );
@@ -53,25 +54,33 @@ grid shape across rows and columns.
 
 The default style pen is used as the widget pen.
 
+The following style keys are used:
+
+=over 4
+
+=item col_spacing => INT
+
+The number of columns of spacing between columns
+
+=item row_spacing => INT
+
+The number of rows of spacing between rows
+
+=back
+
 =cut
+
+style_definition base =>
+   row_spacing => 0,
+   col_spacing => 0;
+
+use constant WIDGET_PEN_FROM_STYLE => 1;
 
 =head1 CONSTRUCTOR
 
 =head2 $gridbox = Tickit::Widget::GridBox->new( %args )
 
 Constructs a new C<Tickit::Widget::GridBox> object.
-
-Takes the following named arguments:
-
-=over 8
-
-=item col_spacing => INT
-
-=item row_spacing => INT
-
-Optional. Initial values for the C<col_spacing> and C<row_spacing> attributes.
-
-=back
 
 =cut
 
@@ -80,54 +89,20 @@ sub new
    my $class = shift;
    my %args = @_;
 
+   exists $args{$_} and $args{style}{$_} = delete $args{$_} for qw( row_spacing col_spacing );
+
    my $self = $class->SUPER::new( %args );
 
    $self->{grid} = [];
    $self->{max_col} = 0;
 
-   $self->set_row_spacing( $args{row_spacing} || 0 );
-   $self->set_col_spacing( $args{col_spacing} || 0 );
-
    return $self;
-}
-
-=head1 ACCESSORS
-
-=cut
-
-=head2 $spacing = $gridbox->row_spacing
-
-=head2 $gridbox->set_row_spacing( $spacing )
-
-Return or set the number of lines of inter-row spacing.
-
-=head2 $spacing = $gridbox->col_spacing
-
-=head2 $gridbox->set_col_spacing( $spacing )
-
-Return or set the number of lines of inter-column spacing.
-
-=cut
-
-foreach my $d (qw( row col )) {
-   my $spacing = "${d}_spacing";
-
-   no strict 'refs';
-   *$spacing = sub {
-      my $self = shift;
-      return $self->{$spacing};
-   };
-
-   *${\"set_$spacing"} = sub {
-      my $self = shift;
-      ( $self->{$spacing} ) = @_;
-      $self->resized;
-   };
 }
 
 sub lines
 {
    my $self = shift;
+   my $row_spacing = $self->get_style_values( "row_spacing" );
    my $max_row = $#{$self->{grid}};
    my $max_col = $self->{max_col};
    return ( sum( map {
@@ -138,12 +113,13 @@ sub lines
             $child ? $child->lines : 0;
          } 0 .. $max_col
       } 0 .. $max_row ) ) +
-      $self->row_spacing * ( $max_row - 1 );
+      $row_spacing * ( $max_row - 1 );
 }
 
 sub cols
 {
    my $self = shift;
+   my $col_spacing = $self->get_style_values( "col_spacing" );
    my $max_row = $#{$self->{grid}};
    my $max_col = $self->{max_col};
    return ( sum( map {
@@ -154,7 +130,7 @@ sub cols
             $child ? $child->cols : 0;
          } 0 .. $max_row
       } 0 .. $max_col ) ) +
-      $self->col_spacing * ( $max_col - 1 );
+      $col_spacing * ( $max_col - 1 );
 }
 
 sub children
@@ -258,23 +234,34 @@ sub remove
    $self->SUPER::remove( $child );
 }
 
-sub reshape
+sub on_style_changed_values
 {
    my $self = shift;
-   $self->redistribute_child_windows;
+   my %values = @_;
+
+   foreach (qw( row_spacing col_spacing )) {
+      next if !$values{$_};
+
+      $self->reshape;
+      $self->redraw;
+      return;
+   }
+
+   $self->redraw;
 }
 
+## TODO: This should come from Tickit::ContainerWidget in 0.32
 sub children_changed
 {
    my $self = shift;
 
-   $self->redistribute_child_windows if $self->window;
+   $self->reshape if $self->window;
    $self->resized; # Tell my parent
 
    $self->redraw;
 }
 
-sub redistribute_child_windows
+sub reshape
 {
    my $self = shift;
    my $win = $self->window or return;
@@ -285,8 +272,10 @@ sub redistribute_child_windows
    my $max_row = $#{$self->{grid}};
    my $max_col = $self->{max_col};
 
+   my ( $row_spacing, $col_spacing ) = $self->get_style_values(qw( row_spacing col_spacing ));
+
    foreach my $row ( 0 .. $max_row ) {
-      push @row_buckets, { fixed => $self->row_spacing } if @row_buckets;
+      push @row_buckets, { fixed => $row_spacing } if @row_buckets;
 
       my $base = 0;
       my $expand = 0;
@@ -306,7 +295,7 @@ sub redistribute_child_windows
    }
 
    foreach my $col ( 0 .. $max_col ) {
-      push @col_buckets, { fixed => $self->col_spacing } if @col_buckets;
+      push @col_buckets, { fixed => $col_spacing } if @col_buckets;
 
       my $base = 0;
       my $expand = 0;
@@ -364,10 +353,15 @@ sub render
    my $win = $self->window or return;
    my $rect = $args{rect};
 
+   my $rc = Tickit::RenderContext->new( lines => $win->lines, cols => $win->cols );
+   $rc->clip( $rect );
+   $rc->setpen( $self->pen );
+
    foreach my $line ( $rect->linerange ) {
-      $win->goto( $line, $rect->left );
-      $win->erasech( $rect->cols );
+      $rc->erase_at( $line, $rect->left, $rect->cols );
    }
+
+   $rc->flush_to_window( $win );
 }
 
 =head1 AUTHOR

@@ -10,16 +10,9 @@ use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 use Tickit::Utils qw( textwidth chars2cols cols2chars substrwidth );
-
-style_definition base =>
-   more_fg    => "cyan",
-   more_left  => "<..",
-   more_right => "..>";
-
-use constant WIDGET_PEN_FROM_STYLE => 1;
 
 # Positions in this code can get complicated. The following conventions apply:
 #   $pos_ch  = a position in CHaracters within a Unicode string (length, substr,..)
@@ -78,6 +71,13 @@ right, respectively
 =back
 
 =cut
+
+style_definition base =>
+   more_fg    => "cyan",
+   more_left  => "<..",
+   more_right => "..>";
+
+use constant WIDGET_PEN_FROM_STYLE => 1;
 
 =head1 KEYBINDINGS
 

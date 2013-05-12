@@ -6,14 +6,19 @@ examples/demo-checkbutton.pl
 examples/demo-entry.pl
 examples/demo-frame.pl
 examples/demo-gridbox.pl
+examples/demo-hsplit.pl
 examples/demo-radiobutton.pl
+examples/demo-vsplit.pl
 lib/Tickit/Widget/Border.pm
 lib/Tickit/Widget/Button.pm
 lib/Tickit/Widget/CheckButton.pm
 lib/Tickit/Widget/Entry.pm
 lib/Tickit/Widget/Frame.pm
 lib/Tickit/Widget/GridBox.pm
+lib/Tickit/Widget/HSplit.pm
+lib/Tickit/Widget/LinearSplit.pm
 lib/Tickit/Widget/RadioButton.pm
+lib/Tickit/Widget/VSplit.pm
 lib/Tickit/Widgets.pm
 LICENSE
 Makefile.PL
@@ -31,4 +36,6 @@ t/12widget-checkbutton.t
 t/20widget-frame.t
 t/21widget-border.t
 t/23widget-gridbox.t
+t/24widget-hsplit.t
+t/24widget-vsplit.t
 t/99pod.t

@@ -1,0 +1,136 @@
+#  You may distribute under the terms of either the GNU General Public License
+#  or the Artistic License (the same terms as Perl itself)
+#
+#  (C) Paul Evans, 2013 -- leonerd@leonerd.org.uk
+
+package Tickit::Widget::LinearSplit;
+
+use strict;
+use warnings;
+use base qw( Tickit::ContainerWidget );
+## TODO use Tickit::Window 0.32; # needs drag_start
+
+our $VERSION = '0.07';
+
+use Carp;
+
+sub new
+{
+   my $class = shift;
+   my %args = @_;
+
+   my $self = $class->SUPER::new( %args );
+
+   $self->{$_} = delete $args{$_} for qw( A_child B_child );
+   $self->{split_fraction} = 0.5;
+
+   return $self;
+}
+
+sub children
+{
+   my $self = shift;
+   return grep { defined } $self->{A_child}, $self->{B_child};
+}
+
+sub child_resized
+{
+   my $self = shift;
+   # TODO: should handle minimums at least
+}
+
+## This should come from ContainerWidget
+sub children_changed
+{
+   my $self = shift;
+
+   $self->reshape if $self->window;
+   $self->resized;
+}
+##
+
+sub reshape
+{
+   my $self = shift;
+   my $win = $self->window or return;
+
+   my $spacing = $self->get_style_values( "spacing" );
+
+   my $method = $self->VALUE_METHOD;
+
+   my $quota = $win->$method - $spacing;
+   my $A_value = int( $quota * $self->{split_fraction} );
+   my $B_value = $quota - $A_value;
+
+   my @A_geom = $self->_make_child_geom( 0,                   $A_value );
+   my @B_geom = $self->_make_child_geom( $A_value + $spacing, $B_value );
+
+   if( my $child = $self->{A_child} ) {
+      if( my $childwin = $child->window ) {
+         $childwin->change_geometry( @A_geom );
+      }
+      else {
+         $child->set_window( $win->make_sub( @A_geom ) );
+      }
+   }
+
+   if( my $child = $self->{B_child} ) {
+      if( my $childwin = $child->window ) {
+         $childwin->change_geometry( @B_geom );
+      }
+      else {
+         $child->set_window( $win->make_sub( @B_geom ) );
+      }
+   }
+
+   $self->{split_at}  = $A_value;
+   $self->{split_len} = $spacing;
+}
+
+sub _on_mouse
+{
+   my $self = shift;
+   my ( $ev, $val ) = @_;
+
+   my $val0 = $val - $self->{split_at};
+   my $in_split = $val0 >= 0 && $val0 < $self->{split_len};
+
+   if( $ev eq "press" ) {
+      $self->set_style_tag( active => 1 ) if $in_split;
+   }
+   elsif( $ev eq "drag_start" ) {
+      return unless $in_split;
+      $self->{drag_mouse_offset} = $val0;
+      return 1;
+   }
+   elsif( $ev eq "drag" ) {
+      return unless defined $self->{drag_mouse_offset};
+
+      my $method = $self->VALUE_METHOD;
+
+      my $quota = $self->window->$method - $self->{split_len};
+
+      my $want_split_at = $val - $self->{drag_mouse_offset};
+
+      if( my $child = $self->{A_child} ) {
+         my $min = $child->$method;
+         $want_split_at = $min if $want_split_at < $min;
+      }
+      if( my $child = $self->{B_child} ) {
+         my $max = $quota - $child->$method;
+         $want_split_at = $max if $want_split_at > $max;
+      }
+
+      $self->{split_fraction} = $want_split_at / $quota;
+      $self->reshape;
+      $self->redraw;
+   }
+   elsif( $ev eq "drag_drop" ) {
+      undef $self->{drag_mouse_offset};
+   }
+   elsif( $ev eq "release" ) {
+      $self->set_style_tag( active => 0 ) if $in_split;
+   }
+}
+
+0x55AA;

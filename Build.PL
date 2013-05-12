@@ -7,8 +7,10 @@ my $build = Module::Build->new(
    module_name => 'Tickit::Widgets',
    dist_abstract => "a collection of Tickit::Widget implementations",
    requires => {
+      'Tickit::RenderContext' => '0.07',
       'Tickit::Utils' => '0.29',
       'Tickit::Widget' => '0.30',
+      'Tickit::Style' => '0.32'
    },
    build_requires => {
       'Test::More' => '0.88', # done_testing

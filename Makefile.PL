@@ -6,6 +6,8 @@ WriteMakefile
   'VERSION_FROM' => 'lib/Tickit/Widgets.pm',
   'PREREQ_PM' => {
                    'Test::More' => '0.88',
+                   'Tickit::RenderContext' => '0.07',
+                   'Tickit::Style' => '0.32',
                    'Tickit::Utils' => '0.29',
                    'Tickit::Widget' => '0.30'
                  },

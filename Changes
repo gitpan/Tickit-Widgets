@@ -1,5 +1,11 @@
 Revision history for Tickit-Widgets
 
+0.07    CHANGES:
+         * Added Tickit::Widget::HSplit and Tickit::Widget::VSplit
+         * Use new style_reshape_keys from Tickit::Style 0.32
+         * Take GridBox's spacing from style
+         * Use Tickit::RenderContext in most widgets
+
 0.06    CHANGES:
          * Use new WIDGET_PEN_FROM_STYLE from Tickit 0.30
          * Update widgets to use more Tickit::Style behaviour

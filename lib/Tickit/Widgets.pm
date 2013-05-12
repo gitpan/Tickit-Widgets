@@ -8,7 +8,7 @@ package Tickit::Widgets;
 use strict;
 use warnings;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 =head1 NAME
 
@@ -43,7 +43,9 @@ sub import
    # Only need to 'require' the modules because they're all clean object
    # classes, no need to import any of them
    foreach ( @_ ) {
-      my $class = $_;
+      my $class = $_; # $_ is alias to read-only values;
+      local $_; # placate bug in Tickit::RenderContext 0.06
+
       $class = "Tickit::Widget::$class" unless $class =~ m/::/;
 
       ( my $file = "$class.pm" ) =~ s{::}{/}g;
