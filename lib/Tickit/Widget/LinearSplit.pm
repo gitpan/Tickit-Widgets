@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::ContainerWidget );
 ## TODO use Tickit::Window 0.32; # needs drag_start
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 use Carp;
 
@@ -59,27 +59,49 @@ sub reshape
    my $method = $self->VALUE_METHOD;
 
    my $quota = $win->$method - $spacing;
-   my $A_value = int( $quota * $self->{split_fraction} );
-   my $B_value = $quota - $A_value;
+   my $want_split_at = int( $quota * $self->{split_fraction} + 0.5 ); # round to nearest
+
+   # Enforce child minimum sizes
+   if( my $child = $self->{B_child} ) {
+      my $max = $quota - $child->$method;
+      $want_split_at = $max if $want_split_at > $max;
+   }
+   if( my $child = $self->{A_child} ) {
+      my $min = $child->$method;
+      $want_split_at = $min if $want_split_at < $min;
+   }
+
+   my $A_value = $want_split_at;
+   my $B_value = $quota - $want_split_at;
 
    my @A_geom = $self->_make_child_geom( 0,                   $A_value );
    my @B_geom = $self->_make_child_geom( $A_value + $spacing, $B_value );
 
    if( my $child = $self->{A_child} ) {
-      if( my $childwin = $child->window ) {
-         $childwin->change_geometry( @A_geom );
+      if( $A_value > 0 ) {
+         if( my $childwin = $child->window ) {
+            $childwin->change_geometry( @A_geom );
+         }
+         else {
+            $child->set_window( $win->make_sub( @A_geom ) );
+         }
       }
       else {
-         $child->set_window( $win->make_sub( @A_geom ) );
+         $child->set_window( undef );
       }
    }
 
    if( my $child = $self->{B_child} ) {
-      if( my $childwin = $child->window ) {
-         $childwin->change_geometry( @B_geom );
+      if( $B_value > 0 ) {
+         if( my $childwin = $child->window ) {
+            $childwin->change_geometry( @B_geom );
+         }
+         else {
+            $child->set_window( $win->make_sub( @B_geom ) );
+         }
       }
       else {
-         $child->set_window( $win->make_sub( @B_geom ) );
+         $child->set_window( undef );
       }
    }
 
@@ -111,17 +133,8 @@ sub _on_mouse
       my $quota = $self->window->$method - $self->{split_len};
 
       my $want_split_at = $val - $self->{drag_mouse_offset};
-
-      if( my $child = $self->{A_child} ) {
-         my $min = $child->$method;
-         $want_split_at = $min if $want_split_at < $min;
-      }
-      if( my $child = $self->{B_child} ) {
-         my $max = $quota - $child->$method;
-         $want_split_at = $max if $want_split_at > $max;
-      }
-
       $self->{split_fraction} = $want_split_at / $quota;
+
       $self->reshape;
       $self->redraw;
    }

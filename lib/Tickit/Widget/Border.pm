@@ -11,7 +11,7 @@ use base qw( Tickit::SingleChildWidget );
 use Tickit::Style;
 use Tickit::RenderContext;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 use constant WIDGET_PEN_FROM_STYLE => 1;
 

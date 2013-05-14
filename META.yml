@@ -14,13 +14,13 @@ name: Tickit-Widgets
 provides:
   Tickit::Widget::Border:
     file: lib/Tickit/Widget/Border.pm
-    version: 0.07
+    version: 0.08
   Tickit::Widget::Button:
     file: lib/Tickit/Widget/Button.pm
-    version: 0.07
+    version: 0.08
   Tickit::Widget::CheckButton:
     file: lib/Tickit/Widget/CheckButton.pm
-    version: 0.07
+    version: 0.08
   Tickit::Widget::Entry:
     file: lib/Tickit/Widget/Entry.pm
     version: 0.21
@@ -29,22 +29,25 @@ provides:
     version: 0.26
   Tickit::Widget::GridBox:
     file: lib/Tickit/Widget/GridBox.pm
-    version: 0.07
+    version: 0.08
   Tickit::Widget::HSplit:
     file: lib/Tickit/Widget/HSplit.pm
-    version: 0.07
+    version: 0.08
   Tickit::Widget::LinearSplit:
     file: lib/Tickit/Widget/LinearSplit.pm
-    version: 0.07
+    version: 0.08
+  Tickit::Widget::Placegrid:
+    file: lib/Tickit/Widget/Placegrid.pm
+    version: 0.08
   Tickit::Widget::RadioButton:
     file: lib/Tickit/Widget/RadioButton.pm
-    version: 0.07
+    version: 0.08
   Tickit::Widget::VSplit:
     file: lib/Tickit/Widget/VSplit.pm
-    version: 0.07
+    version: 0.08
   Tickit::Widgets:
     file: lib/Tickit/Widgets.pm
-    version: 0.07
+    version: 0.08
 requires:
   Tickit::RenderContext: 0.07
   Tickit::Style: 0.32
@@ -52,4 +55,4 @@ requires:
   Tickit::Widget: 0.30
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.07
+version: 0.08

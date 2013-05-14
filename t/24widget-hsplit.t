@@ -46,11 +46,11 @@ $widget->set_style( spacing => 4 );
 
 flush_tickit;
 
-is_display( [ [TEXT("Widget A")], BLANKLINES(9),
+is_display( [ [TEXT("Widget A")], BLANKLINES(10),
               [TEXT("─"x80,bg=>4,fg=>7)],
               BLANKLINES(2,bg=>4,fg=>7),
               [TEXT("─"x80,bg=>4,fg=>7)],
-              [TEXT("Widget B")], BLANKLINES(11) ],
+              [TEXT("Widget B")], BLANKLINES(10) ],
             'Display after ->set_style spacing' );
 
 pressmouse( press   => 1, 12, 39 );
@@ -59,11 +59,11 @@ pressmouse( release => 1,  6, 39 );
 
 flush_tickit;
 
-is_display( [ [TEXT("Widget A")], BLANKLINES(3),
+is_display( [ [TEXT("Widget A")], BLANKLINES(4),
               [TEXT("─"x80,bg=>4,fg=>7)],
               BLANKLINES(2,bg=>4,fg=>7),
               [TEXT("─"x80,bg=>4,fg=>7)],
-              [TEXT("Widget B")], BLANKLINES(17) ],
+              [TEXT("Widget B")], BLANKLINES(16) ],
             'Display after mouse drag reshape' );
 
 done_testing;

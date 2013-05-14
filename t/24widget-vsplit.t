@@ -37,8 +37,8 @@ ok( defined $statics[0]->window, '$statics[0] has window after $widget->set_wind
 
 flush_tickit;
 
-is_display( [ [TEXT("Widget A"), BLANK(31), TEXT("│",bg=>4,fg=>7), TEXT("Widget B"), BLANK(32)],
-              map { [BLANK(39), TEXT("│",bg=>4,fg=>7), BLANK(40)] } 2 .. 25 ],
+is_display( [ [TEXT("Widget A"), BLANK(32), TEXT("│",bg=>4,fg=>7), TEXT("Widget B"), BLANK(31)],
+              map { [BLANK(40), TEXT("│",bg=>4,fg=>7), BLANK(39)] } 2 .. 25 ],
             'Display initially' );
 
 $widget->set_style( spacing => 4 );

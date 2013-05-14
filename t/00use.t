@@ -14,6 +14,7 @@ use_ok( 'Tickit::Widget::Entry' );
 use_ok( 'Tickit::Widget::Frame' );
 use_ok( 'Tickit::Widget::GridBox' );
 use_ok( 'Tickit::Widget::HSplit' );
+use_ok( 'Tickit::Widget::Placegrid' );
 use_ok( 'Tickit::Widget::RadioButton' );
 use_ok( 'Tickit::Widget::VSplit' );
 

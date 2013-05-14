@@ -1,5 +1,10 @@
 Revision history for Tickit-Widgets
 
+0.08    CHANGES:
+         * Added Tickit::Widget::Placegrid
+         * Fix floating-point rounding bug in HSplit/VSplit
+         * Better HSplit/VSplit behavior on resize
+
 0.07    CHANGES:
          * Added Tickit::Widget::HSplit and Tickit::Widget::VSplit
          * Use new style_reshape_keys from Tickit::Style 0.32

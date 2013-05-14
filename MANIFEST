@@ -17,6 +17,7 @@ lib/Tickit/Widget/Frame.pm
 lib/Tickit/Widget/GridBox.pm
 lib/Tickit/Widget/HSplit.pm
 lib/Tickit/Widget/LinearSplit.pm
+lib/Tickit/Widget/Placegrid.pm
 lib/Tickit/Widget/RadioButton.pm
 lib/Tickit/Widget/VSplit.pm
 lib/Tickit/Widgets.pm
