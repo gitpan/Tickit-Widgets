@@ -10,9 +10,11 @@ use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 use Tickit::Utils qw( textwidth chars2cols cols2chars substrwidth );
+
+use constant CAN_FOCUS => 1;
 
 # Positions in this code can get complicated. The following conventions apply:
 #   $pos_ch  = a position in CHaracters within a Unicode string (length, substr,..)
@@ -214,11 +216,14 @@ sub new
 
    $self->set_on_enter( $params{on_enter} ) if defined $params{on_enter};
 
+   # Since we take keyboard input we almost certainly want to take focus here
+   $self->take_focus;
+
    return $self;
 }
 
 sub lines { 1 }
-sub cols  { 1 }
+sub cols  { 5 }
 
 sub char2col
 {
@@ -311,6 +316,9 @@ sub _recalculate_scroll
    my $width = $self->window->cols;
    my $halfwidth = int( $width / 2 );
 
+   # Don't even try unless we have at least 2 columns
+   return unless $halfwidth;
+
    # Try to keep the cursor within 5 columns of the window edge
    while( $pos_x < 5 and $off_co >= 5 ) {
       $off_co -= $halfwidth;
@@ -343,7 +351,7 @@ sub reposition_cursor
 
    my $pos_x = $self->char2col( $self->{pos_ch} ) - $self->{scrolloffs_co};
 
-   $win->focus( 0, $pos_x );
+   $win->cursor_at( 0, $pos_x );
 }
 
 sub _text_spliced
@@ -422,10 +430,13 @@ sub _text_spliced
 sub on_key
 {
    my $self = shift;
-   my ( $type, $str, $key ) = @_;
+   my ( $args ) = @_;
+
+   my $type = $args->type;
+   my $str  = $args->str;
 
    if( $type eq "key" and my $code = $self->{keybindings}{$str} ) {
-      $self->$code( $str, $key );
+      $self->$code( $str );
       return 1;
    }
    if( $type eq "text" ) {
@@ -447,11 +458,11 @@ sub on_text
 sub on_mouse
 {
    my $self = shift;
-   my ( $ev, $button, $line, $col ) = @_;
+   my ( $args ) = @_;
 
-   return unless $ev eq "press" and $button == 1;
+   return unless $args->type eq "press" and $args->button == 1;
 
-   my $pos_ch = scalar cols2chars $self->{text}, $col + $self->{scrolloffs_co};
+   my $pos_ch = scalar cols2chars $self->{text}, $args->col + $self->{scrolloffs_co};
    $self->set_position( $pos_ch );
 }
 

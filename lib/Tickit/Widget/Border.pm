@@ -9,9 +9,9 @@ use strict;
 use warnings;
 use base qw( Tickit::SingleChildWidget );
 use Tickit::Style;
-use Tickit::RenderContext;
+use Tickit::RenderBuffer;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use constant WIDGET_PEN_FROM_STYLE => 1;
 
@@ -267,12 +267,12 @@ sub render
 
    my $lines = $win->lines;
    my $cols  = $win->cols;
-   my $rc = Tickit::RenderContext->new( lines => $lines, cols => $cols );
-   $rc->clip( $rect );
-   $rc->setpen( $self->pen );
+   my $rb = Tickit::RenderBuffer->new( lines => $lines, cols => $cols );
+   $rb->clip( $rect );
+   $rb->setpen( $self->pen );
 
    foreach my $line ( $rect->top .. $self->top_border - 1 ) {
-      $rc->erase_at( $line, 0, $cols );
+      $rb->erase_at( $line, 0, $cols );
    }
 
    my $left_border  = $self->left_border;
@@ -283,25 +283,25 @@ sub render
    if( $self->child and $left_border + $right_border < $win->cols ) {
       foreach my $line ( $self->top_border .. $bottom_border_at ) {
          if( $left_border > 0 ) {
-            $rc->erase_at( $line, 0, $left_border );
+            $rb->erase_at( $line, 0, $left_border );
          }
 
          if( $right_border > 0 ) {
-            $rc->erase_at( $line, $right_border_at, $right_border );
+            $rb->erase_at( $line, $right_border_at, $right_border );
          }
       }
    }
    else {
       foreach my $line ( $self->top_border .. $win->lines - $self->bottom_border - 1 ) {
-         $rc->erase_at( $line, 0, $cols );
+         $rb->erase_at( $line, 0, $cols );
       }
    }
 
    foreach my $line ( $win->lines - $self->bottom_border .. $rect->bottom - 1 ) {
-      $rc->erase_at( $line, 0, $cols );
+      $rb->erase_at( $line, 0, $cols );
    }
 
-   $rc->flush_to_window( $win );
+   $rb->flush_to_window( $win );
 }
 
 =head1 AUTHOR

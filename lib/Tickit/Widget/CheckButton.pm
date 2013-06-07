@@ -9,14 +9,16 @@ use strict;
 use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
-use Tickit::RenderContext;
+use Tickit::RenderBuffer;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use Carp;
 
 use Tickit::Utils qw( textwidth );
 use List::MoreUtils qw( any );
+
+use constant CAN_FOCUS => 1;
 
 =head1 NAME
 
@@ -94,6 +96,10 @@ style_definition ':active' =>
    b        => 1,
    check    => "[X]";
 
+style_reshape_keys qw( spacing );
+
+style_reshape_textwidth_keys qw( check );
+
 use constant WIDGET_PEN_FROM_STYLE => 1;
 
 =head1 CONSTRUCTOR
@@ -168,31 +174,6 @@ sub set_label
    $self->redraw;
 }
 
-sub on_style_changed_values
-{
-   my $self = shift;
-   my %values = @_;
-
-   foreach (qw( spacing )) {
-      next if !$values{$_};
-
-      $self->reshape;
-      $self->redraw;
-      return;
-   }
-
-   foreach (qw( check )) {
-      next if !$values{$_};
-      next if textwidth( $values{$_}[0] ) == textwidth( $values{$_}[1] );
-
-      $self->reshape;
-      $self->redraw;
-      return;
-   }
-
-   $self->redraw;
-}
-
 =head1 METHODS
 
 =cut
@@ -242,28 +223,31 @@ sub render
    my %args = @_;
    my $win = $self->window or return;
 
-   my $rc = Tickit::RenderContext->new( lines => $win->lines, cols => $win->cols );
-   $rc->clip( $args{rect} );
-   $rc->setpen( $self->pen );
+   my $rb = Tickit::RenderBuffer->new( lines => $win->lines, cols => $win->cols );
+   $rb->clip( $args{rect} );
+   $rb->setpen( $self->pen );
 
-   $rc->clear;
+   $rb->clear;
 
-   $rc->goto( 0, 0 );
+   $rb->goto( 0, 0 );
 
-   $rc->text( $self->get_style_values( "check" ), $self->get_style_pen( "check" ) );
-   $rc->erase( $self->get_style_values( "spacing" ) );
-   $rc->text( $self->{label} );
-   $rc->erase_to( $win->cols );
+   $rb->text( my $check = $self->get_style_values( "check" ), $self->get_style_pen( "check" ) );
+   $rb->erase( $self->get_style_values( "spacing" ) );
+   $rb->text( $self->{label} );
+   $rb->erase_to( $win->cols );
 
-   $rc->flush_to_window( $win );
+   $rb->flush_to_window( $win );
+
+   $win->cursor_at( 0, ( textwidth( $check )-1 ) / 2 );
 }
 
 sub on_mouse
 {
    my $self = shift;
-   my ( $ev, $button, $line, $col ) = @_;
-   return unless $ev eq "press" and $button == 1;
-   return 1 unless $line == 0;
+   my ( $args ) = @_;
+
+   return unless $args->type eq "press" and $args->button == 1;
+   return 1 unless $args->line == 0;
 
    $self->is_active ? $self->deactivate : $self->activate;
 }

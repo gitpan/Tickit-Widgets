@@ -1,5 +1,12 @@
 Revision history for Tickit-Widgets
 
+0.09    CHANGES:
+         * Added optional title to Placegrid
+         * Avoid infinite CPU spin in Entry
+         * Handle Tickit 0.34 focus behaviours
+         * Improved Button behaviour and style information
+         * Updated all to use RenderBuffer instead of RenderContext
+
 0.08    CHANGES:
          * Added Tickit::Widget::Placegrid
          * Fix floating-point rounding bug in HSplit/VSplit

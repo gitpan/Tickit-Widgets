@@ -6,9 +6,16 @@ use warnings;
 use Tickit;
 use Tickit::Widgets qw( Border Button VBox );
 
+Tickit::Style->load_style( <<'EOF' );
+Button {
+  fg: "black";
+  bg: "white";
+}
+EOF
+
 my $border = Tickit::Widget::Border->new(
    h_border => 10,
-   v_border => 4,
+   v_border => 2,
    child => my $vbox = Tickit::Widget::VBox->new( spacing => 2, bg => "black" ),
 );
 

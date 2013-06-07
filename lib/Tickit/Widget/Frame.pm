@@ -12,7 +12,7 @@ use Tickit::Style;
 
 use Tickit::WidgetRole::Alignable name => "title_align";
 
-our $VERSION = '0.26';
+our $VERSION = '0.27';
 
 use Carp;
 
@@ -202,9 +202,6 @@ sub on_style_changed_values
 {
    my $self = shift;
    my %values = @_;
-
-   # TODO: We can put some of this logic in Tickit::Widget
-   exists $values{"frame_$_"} and $self->redraw, return for @Tickit::Pen::ALL_ATTRS;
 
    foreach (qw( linetype )) {
       next if !$values{$_};

@@ -10,9 +10,9 @@ use strict;
 use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
-use Tickit::RenderContext qw( LINE_SINGLE LINE_THICK );
+use Tickit::RenderBuffer qw( LINE_SINGLE LINE_THICK );
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use Tickit::Utils qw( textwidth );
 
@@ -51,6 +51,36 @@ style_definition base =>
 
 use constant WIDGET_PEN_FROM_STYLE => 1;
 
+=head1 CONSTRUCTOR
+
+=head2 $placegrid = Tickit::Widget::Placegrid->new( %args )
+
+Constructs a new C<Tickit::Widget::Placegrid> object.
+
+Takes the following named arguments.
+
+=over 8
+
+=item title => STR
+
+Optional. If provided, prints an identifying title just above the box
+dimensions in the centre of the grid.
+
+=back
+
+=cut
+
+sub new
+{
+   my $class = shift;
+   my %args = @_;
+   my $self = $class->SUPER::new( %args );
+
+   $self->{title} = $args{title};
+
+   return $self;
+}
+
 sub lines { 1 }
 sub cols  { 1 }
 
@@ -60,28 +90,34 @@ sub render {
    my %args = @_;
    my $win = $self->window or return;
 
-   my $rc = Tickit::RenderContext->new(
+   my $rb = Tickit::RenderBuffer->new(
       lines => $win->lines,
       cols  => $win->cols,
    );
-   $rc->clip($args{rect});
+   $rb->clip($args{rect});
 
-   $rc->clear($self->pen);
+   $rb->clear($self->pen);
 
    my ($w, $h) = map $win->$_ - 1, qw(cols lines);
 
-   $rc->setpen($self->get_style_pen("grid"));
-   $rc->hline_at(0, 0, $w, LINE_THICK);
-   $rc->hline_at($h, 0, $w, LINE_THICK);
-   $rc->hline_at($h / 2, 0, $w, LINE_SINGLE);
-   $rc->vline_at(0, $h, 0, LINE_THICK);
-   $rc->vline_at(0, $h, $w, LINE_THICK);
-   $rc->vline_at(0, $h, $w / 2, LINE_SINGLE);
+   $rb->setpen($self->get_style_pen("grid"));
+   $rb->hline_at(0, 0, $w, LINE_THICK);
+   $rb->hline_at($h, 0, $w, LINE_THICK);
+   $rb->hline_at($h / 2, 0, $w, LINE_SINGLE);
+   $rb->vline_at(0, $h, 0, LINE_THICK);
+   $rb->vline_at(0, $h, $w, LINE_THICK);
+   $rb->vline_at(0, $h, $w / 2, LINE_SINGLE);
+
+   $rb->setpen($self->pen);
+
+   if(defined(my $title = $self->{title})) {
+      $rb->text_at(($h / 2) - 1, (1 + $w - textwidth($title)) / 2, $title);
+   }
 
    my $txt = '(' . $win->cols . ',' . $win->lines . ')';
-   $rc->text_at($h / 2, (1 + $w - textwidth($txt)) / 2, $txt, $self->pen);
+   $rb->text_at($h / 2, (1 + $w - textwidth($txt)) / 2, $txt);
 
-   $rc->flush_to_window($win);
+   $rb->flush_to_window($win);
 }
 
 =head1 AUTHOR

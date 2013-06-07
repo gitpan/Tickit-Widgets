@@ -9,9 +9,9 @@ use strict;
 use warnings;
 use base qw( Tickit::Widget::LinearSplit );
 use Tickit::Style;
-use Tickit::RenderContext qw( LINE_SINGLE CAP_BOTH );
+use Tickit::RenderBuffer qw( LINE_SINGLE CAP_BOTH );
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use Carp;
 
@@ -184,33 +184,33 @@ sub render
    my %args = @_;
 
    my $win = $self->window or return;
-   my $rc = Tickit::RenderContext->new( lines => $win->lines, cols => $win->cols );
-   $rc->clip( $args{rect} );
+   my $rb = Tickit::RenderBuffer->new( lines => $win->lines, cols => $win->cols );
+   $rb->clip( $args{rect} );
 
    my $split_len = $self->{split_len};
 
-   $rc->setpen( $self->get_style_pen( "split" ) );
+   $rb->setpen( $self->get_style_pen( "split" ) );
 
-   $rc->hline_at( $self->{split_at}, 0, $rc->cols-1, LINE_SINGLE, undef, CAP_BOTH );
+   $rb->hline_at( $self->{split_at}, 0, $rb->cols-1, LINE_SINGLE, undef, CAP_BOTH );
 
    for ( 1 .. $split_len - 2 ) {
-      $rc->erase_at( $self->{split_at} + $_, 0, $rc->cols );
+      $rb->erase_at( $self->{split_at} + $_, 0, $rb->cols );
    }
 
    if( $split_len > 1 ) {
-      $rc->hline_at( $self->{split_at} + $split_len - 1, 0, $rc->cols-1, LINE_SINGLE, undef, CAP_BOTH );
+      $rb->hline_at( $self->{split_at} + $split_len - 1, 0, $rb->cols-1, LINE_SINGLE, undef, CAP_BOTH );
    }
 
-   $rc->flush_to_window( $win );
+   $rb->flush_to_window( $win );
 }
 
 sub on_mouse
 {
    my $self = shift;
-   my ( $ev, $button, $line, $col ) = @_;
+   my ( $args ) = @_;
 
-   return unless $button == 1;
-   return $self->_on_mouse( $ev, $line );
+   return unless $args->button == 1;
+   return $self->_on_mouse( $args->type, $args->line );
 }
 
 =head1 AUTHOR

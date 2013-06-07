@@ -173,6 +173,7 @@ drain_termlog;
    my $subwin = $win->make_sub( 2, 2, $win->lines - 4, $win->cols - 4 );
 
    $entry->set_window( $subwin );
+   $entry->take_focus;
 
    flush_tickit;
 

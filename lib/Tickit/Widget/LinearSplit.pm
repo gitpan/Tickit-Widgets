@@ -8,9 +8,9 @@ package Tickit::Widget::LinearSplit;
 use strict;
 use warnings;
 use base qw( Tickit::ContainerWidget );
-## TODO use Tickit::Window 0.32; # needs drag_start
+use Tickit::Window 0.32; # needs drag_start
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use Carp;
 

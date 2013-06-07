@@ -9,11 +9,13 @@ use strict;
 use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
-use Tickit::RenderContext qw( LINE_SINGLE );
+use Tickit::RenderBuffer qw( LINE_SINGLE );
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use Tickit::Utils qw( textwidth );
+
+use constant CAN_FOCUS => 1;
 
 =head1 NAME
 
@@ -42,9 +44,42 @@ When the area is clicked, a callback is invoked.
 
 =head1 STYLE
 
-The default style pen is used as the widget pen.
+The default style pen is used as the widget pen. The following style keys are
+used:
+
+=over 4
+
+=item marker_left => STRING
+
+A two-character string to place just before the button label
+
+=item marker_right => STRING
+
+A two-character string to place just after the button label
+
+=back
+
+The following style tags are used:
+
+=over 4
+
+=item :active
+
+Set when the mouse is being held over the button, before it is released
+
+=back
 
 =cut
+
+style_definition base =>
+   fg => "black",
+   bg => "blue",
+   marker_left => "> ",
+   marker_right => " <";
+
+style_definition ':active' =>
+   marker_left => ">>",
+   marker_right => "<<";
 
 use constant WIDGET_PEN_FROM_STYLE => 1;
 
@@ -177,48 +212,54 @@ sub render
 
    my $lines = $win->lines;
    my $cols  = $win->cols;
-   my $rc = Tickit::RenderContext->new( lines => $lines, cols => $cols );
-   $rc->clip( $rect );
-   $rc->setpen( $self->pen );
+   my $rb = Tickit::RenderBuffer->new( lines => $lines, cols => $cols );
+   $rb->clip( $rect );
+   $rb->setpen( $self->pen );
 
    my $label = $self->label;
    my $width = textwidth $label;
-   my $focused = $win->is_focused;
+
+   my ( $marker_left, $marker_right ) = $self->get_style_values( "marker_left", "marker_right" );
 
    my ( $lines_before, undef, $lines_after ) = $self->_valign_allocation( 1, $lines - 2 );
    my ( $cols_before, undef, $cols_after ) = $self->_align_allocation( $width + 2, $cols - 2 );
 
-   $rc->hline_at( 0,        0, $cols-1, LINE_SINGLE );
-   $rc->hline_at( $lines-1, 0, $cols-1, LINE_SINGLE );
-   $rc->vline_at( 0, $lines-1, 0,       LINE_SINGLE );
-   $rc->vline_at( 0, $lines-1, $cols-1, LINE_SINGLE );
+   $rb->hline_at( 0,        0, $cols-1, LINE_SINGLE );
+   $rb->hline_at( $lines-1, 0, $cols-1, LINE_SINGLE );
+   $rb->vline_at( 0, $lines-1, 0,       LINE_SINGLE );
+   $rb->vline_at( 0, $lines-1, $cols-1, LINE_SINGLE );
 
    foreach my $line ( 1 .. $lines-2 ) {
-      $rc->erase_at( $line, 1, $cols-2 );
+      $rb->erase_at( $line, 1, $cols-2 );
    }
-
    my $label_line = $lines_before + 1;
-   $rc->text_at( $label_line, $cols_before + 2, $label );
 
-   if( $focused ) {
-      $rc->char_at( $label_line, $cols_before, 0x25B6 ); # Black right-pointing triangle
-      $rc->char_at( $label_line, $cols-1 - $cols_after, 0x25C0 ); # Black left-pointing triangle
-   }
+   $rb->text_at( $label_line, $cols_before, $marker_left );
+   $rb->text_at( $label_line, $cols-2 - $cols_after, $marker_right );
 
-   $rc->flush_to_window( $win );
+   $rb->text_at( $label_line, $cols_before + 2, $label );
+
+   $rb->flush_to_window( $win );
+
+   $win->cursor_at( $label_line, $cols_before + 2 );
 }
 
 sub on_mouse
 {
    my $self = shift;
-   my ( $ev, $button, $line, $col ) = @_;
+   my ( $args ) = @_;
 
-   if( $ev eq "press" and $button == 1 ) {
-      $self->window->focus( 1, 1 ); # TODO
+   my $type = $args->type;
+   my $button = $args->button;
+
+   if( $type eq "press" and $button == 1 ) {
+      $self->set_style_tag( active => 1 );
       $self->redraw;
    }
-   elsif( $ev eq "release" and $button == 1 ) {
+   if( $type eq "release" and $button == 1 ) {
+      $self->set_style_tag( active => 0 );
       $self->{on_click}->( $self );
+      $self->redraw;
    }
 }
 

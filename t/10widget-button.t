@@ -30,18 +30,18 @@ $button->set_window( $win );
 
 flush_tickit;
 
-is_display( [ [TEXT("┌────────────┐")],
-              [TEXT("│  Click me  │")],
-              [TEXT("└────────────┘")] ],
+is_display( [ [TEXT("┌────────────┐",fg=>0,bg=>4)],
+              [TEXT("│> Click me <│",fg=>0,bg=>4)],
+              [TEXT("└────────────┘",fg=>0,bg=>4)] ],
             'Display initially' );
 
 pressmouse( press => 1, 1, 10 );
 
 flush_tickit;
 
-is_display( [ [TEXT("┌────────────┐")],
-              [TEXT("│▶ Click me ◀│")],
-              [TEXT("└────────────┘")] ],
+is_display( [ [TEXT("┌────────────┐",fg=>0,bg=>4)],
+              [TEXT("│>>Click me<<│",fg=>0,bg=>4)],
+              [TEXT("└────────────┘",fg=>0,bg=>4)] ],
             'Display after focus' );
 
 is( $clicked, 0, '$clicked before mouse release' );
@@ -50,9 +50,9 @@ pressmouse( release => 1, 1, 10 );
 
 flush_tickit;
 
-is_display( [ [TEXT("┌────────────┐")],
-              [TEXT("│▶ Click me ◀│")],
-              [TEXT("└────────────┘")] ],
+is_display( [ [TEXT("┌────────────┐",fg=>0,bg=>4)],
+              [TEXT("│> Click me <│",fg=>0,bg=>4)],
+              [TEXT("└────────────┘",fg=>0,bg=>4)] ],
             'Display after mouse release' );
 
 is( $clicked, 1, '$clicked after mouse release' );

@@ -9,9 +9,9 @@ use strict;
 use warnings;
 use base qw( Tickit::ContainerWidget );
 use Tickit::Style;
-use Tickit::RenderContext;
+use Tickit::RenderBuffer;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use Carp;
 
@@ -73,6 +73,8 @@ The number of rows of spacing between rows
 style_definition base =>
    row_spacing => 0,
    col_spacing => 0;
+
+style_reshape_keys qw( row_spacing col_spacing );
 
 use constant WIDGET_PEN_FROM_STYLE => 1;
 
@@ -234,33 +236,6 @@ sub remove
    $self->SUPER::remove( $child );
 }
 
-sub on_style_changed_values
-{
-   my $self = shift;
-   my %values = @_;
-
-   foreach (qw( row_spacing col_spacing )) {
-      next if !$values{$_};
-
-      $self->reshape;
-      $self->redraw;
-      return;
-   }
-
-   $self->redraw;
-}
-
-## TODO: This should come from Tickit::ContainerWidget in 0.32
-sub children_changed
-{
-   my $self = shift;
-
-   $self->reshape if $self->window;
-   $self->resized; # Tell my parent
-
-   $self->redraw;
-}
-
 sub reshape
 {
    my $self = shift;
@@ -353,15 +328,15 @@ sub render
    my $win = $self->window or return;
    my $rect = $args{rect};
 
-   my $rc = Tickit::RenderContext->new( lines => $win->lines, cols => $win->cols );
-   $rc->clip( $rect );
-   $rc->setpen( $self->pen );
+   my $rb = Tickit::RenderBuffer->new( lines => $win->lines, cols => $win->cols );
+   $rb->clip( $rect );
+   $rb->setpen( $self->pen );
 
    foreach my $line ( $rect->linerange ) {
-      $rc->erase_at( $line, $rect->left, $rect->cols );
+      $rb->erase_at( $line, $rect->left, $rect->cols );
    }
 
-   $rc->flush_to_window( $win );
+   $rb->flush_to_window( $win );
 }
 
 =head1 AUTHOR
