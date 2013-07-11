@@ -1,5 +1,14 @@
 Revision history for Tickit-Widgets
 
+0.10    CHANGES:
+         * Implement key actions in Button, CheckButton, RadioButton
+         * Neater visual style for Button; indicate focus vs. active
+         * Visually flash Button on activation by keypress
+         * Update to use Tickit 0.35's ->render_to_rb
+
+        BUGFIXES
+         * Ensure that Entry doesn't consume keypresses unless it is focused
+
 0.09    CHANGES:
          * Added optional title to Placegrid
          * Avoid infinite CPU spin in Entry

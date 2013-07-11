@@ -11,11 +11,11 @@ use base qw( Tickit::Widget::LinearSplit );
 use Tickit::Style;
 use Tickit::RenderBuffer qw( LINE_SINGLE CAP_BOTH );
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 use Carp;
 
-use List::Util qw( sum max );
+use List::Util qw( sum min max );
 
 =head1 NAME
 
@@ -177,31 +177,26 @@ sub _make_child_geom
    return ( $start, 0, $len, $self->window->cols );
 }
 
-use constant CLEAR_BEFORE_RENDER => 0;
-sub render
+sub render_to_rb
 {
    my $self = shift;
-   my %args = @_;
-
-   my $win = $self->window or return;
-   my $rb = Tickit::RenderBuffer->new( lines => $win->lines, cols => $win->cols );
-   $rb->clip( $args{rect} );
+   my ( $rb, $rect ) = @_;
 
    my $split_len = $self->{split_len};
 
+   my $cols = $self->window->cols;
+
    $rb->setpen( $self->get_style_pen( "split" ) );
 
-   $rb->hline_at( $self->{split_at}, 0, $rb->cols-1, LINE_SINGLE, undef, CAP_BOTH );
+   $rb->hline_at( $self->{split_at}, 0, $cols-1, LINE_SINGLE, undef, CAP_BOTH );
 
-   for ( 1 .. $split_len - 2 ) {
-      $rb->erase_at( $self->{split_at} + $_, 0, $rb->cols );
+   foreach my $line ( max( $rect->top, 1 ) .. min( $split_len-2, $rect->bottom-1 ) ) {
+      $rb->erase_at( $self->{split_at} + $line, 0, $cols );
    }
 
    if( $split_len > 1 ) {
-      $rb->hline_at( $self->{split_at} + $split_len - 1, 0, $rb->cols-1, LINE_SINGLE, undef, CAP_BOTH );
+      $rb->hline_at( $self->{split_at} + $split_len - 1, 0, $cols-1, LINE_SINGLE, undef, CAP_BOTH );
    }
-
-   $rb->flush_to_window( $win );
 }
 
 sub on_mouse

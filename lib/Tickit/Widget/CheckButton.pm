@@ -9,9 +9,8 @@ use strict;
 use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
-use Tickit::RenderBuffer;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 use Carp;
 
@@ -84,13 +83,24 @@ Set when this button's status is true
 
 =back
 
+The following style actions are used:
+
+=over 4
+
+=item click
+
+The main action to activate the C<on_click> handler.
+
+=back
+
 =cut
 
 style_definition base =>
    check_fg => "hi-white",
    check_b  => 1,
    check    => "[ ]",
-   spacing  => 2;
+   spacing  => 2,
+   '<Space>' => "toggle";
 
 style_definition ':active' =>
    b        => 1,
@@ -101,6 +111,7 @@ style_reshape_keys qw( spacing );
 style_reshape_textwidth_keys qw( check );
 
 use constant WIDGET_PEN_FROM_STYLE => 1;
+use constant KEYPRESSES_FROM_STYLE => 1;
 
 =head1 CONSTRUCTOR
 
@@ -204,6 +215,14 @@ sub deactivate
    $self->set_style_tag( active => 0 );
 }
 
+*key_toggle = \&toggle;
+sub toggle
+{
+   my $self = shift;
+   $self->is_active ? $self->deactivate : $self->activate;
+   return 1;
+}
+
 =head2 $active = $checkbutton->is_active
 
 Returns this button's active state.
@@ -216,29 +235,32 @@ sub is_active
    return !!$self->{active};
 }
 
-use constant CLEAR_BEFORE_RENDER => 0;
-sub render
+sub reshape
 {
    my $self = shift;
-   my %args = @_;
+
    my $win = $self->window or return;
 
-   my $rb = Tickit::RenderBuffer->new( lines => $win->lines, cols => $win->cols );
-   $rb->clip( $args{rect} );
-   $rb->setpen( $self->pen );
+   my $check = $self->get_style_values( "check" );
+
+   $win->cursor_at( 0, ( textwidth( $check )-1 ) / 2 );
+}
+
+sub render_to_rb
+{
+   my $self = shift;
+   my ( $rb, $rect ) = @_;
 
    $rb->clear;
+
+   return if $rect->top > 0;
 
    $rb->goto( 0, 0 );
 
    $rb->text( my $check = $self->get_style_values( "check" ), $self->get_style_pen( "check" ) );
    $rb->erase( $self->get_style_values( "spacing" ) );
    $rb->text( $self->{label} );
-   $rb->erase_to( $win->cols );
-
-   $rb->flush_to_window( $win );
-
-   $win->cursor_at( 0, ( textwidth( $check )-1 ) / 2 );
+   $rb->erase_to( $rect->right );
 }
 
 sub on_mouse
@@ -249,7 +271,7 @@ sub on_mouse
    return unless $args->type eq "press" and $args->button == 1;
    return 1 unless $args->line == 0;
 
-   $self->is_active ? $self->deactivate : $self->activate;
+   $self->toggle;
 }
 
 =head1 AUTHOR

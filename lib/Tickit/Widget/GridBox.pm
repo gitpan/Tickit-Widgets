@@ -9,9 +9,8 @@ use strict;
 use warnings;
 use base qw( Tickit::ContainerWidget );
 use Tickit::Style;
-use Tickit::RenderBuffer;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 use Carp;
 
@@ -319,24 +318,14 @@ sub reshape
    }
 }
 
-use constant CLEAR_BEFORE_RENDER => 0;
-sub render
+sub render_to_rb
 {
    my $self = shift;
-   my %args = @_;
-
-   my $win = $self->window or return;
-   my $rect = $args{rect};
-
-   my $rb = Tickit::RenderBuffer->new( lines => $win->lines, cols => $win->cols );
-   $rb->clip( $rect );
-   $rb->setpen( $self->pen );
+   my ( $rb, $rect ) = @_;
 
    foreach my $line ( $rect->linerange ) {
       $rb->erase_at( $line, $rect->left, $rect->cols );
    }
-
-   $rb->flush_to_window( $win );
 }
 
 =head1 AUTHOR

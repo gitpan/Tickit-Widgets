@@ -10,9 +10,10 @@ use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
 
-our $VERSION = '0.22';
+our $VERSION = '0.23';
 
 use Tickit::Utils qw( textwidth chars2cols cols2chars substrwidth );
+use List::Util qw( min max );
 
 use constant CAN_FOCUS => 1;
 
@@ -244,9 +245,9 @@ sub pretext_width
 sub pretext_render
 {
    my $self = shift;
-   my ( $win ) = @_;
+   my ( $rb ) = @_;
 
-   $win->print( $self->get_style_values( "more_left" ), $self->get_style_pen( "more" ) );
+   $rb->text_at( 0, 0, $self->get_style_values( "more_left" ), $self->get_style_pen( "more" ) );
 }
 
 sub posttext_width
@@ -260,44 +261,51 @@ sub posttext_width
 sub posttext_render
 {
    my $self = shift;
-   my ( $win ) = @_;
+   my ( $rb ) = @_;
 
-   $win->print( $self->get_style_values( "more_right" ), $self->get_style_pen( "more" ) );
+   $rb->text_at( 0, 0, $self->get_style_values( "more_right" ), $self->get_style_pen( "more" ) );
 }
 
+# Tickit 0.35's ->render_to_rb still calls $win->clear :(
+# Doesn't overly matter but our unit tests will get upset
 use constant CLEAR_BEFORE_RENDER => 0;
-sub render
+
+sub render_to_rb
 {
    my $self = shift;
-   my %args = @_;
+   my ( $rb, $rect ) = @_;
 
-   my $win = $self->window or return;
-   $win->is_visible or return;
-   my $rect = $args{rect};
+   my $cols = $self->window->cols;
 
    if( $rect->top == 0 ) {
-      $win->goto( 0, 0 );
+      my $text = substrwidth( $self->text, $self->{scrolloffs_co}, $cols );
 
-      my $width = $win->cols;
+      $rb->goto( 0, 0 );
+      $rb->text( $text ) if length $text;
+      $rb->erase_to( $cols );
 
-      my $text = substrwidth( $self->text, $self->{scrolloffs_co}, $width );
-      my $textlen_co = textwidth $text;
+      if( my $pretext_width = $self->pretext_width ) {
+         $rb->save;
+         $rb->clip( Tickit::Rect->new( top => 0, left => 0, lines => 1, cols => $pretext_width ) );
 
-      my $pretext_width  = $self->pretext_width;
-      my $posttext_width = $self->posttext_width;
+         $self->pretext_render( $rb );
 
-      $self->pretext_render( $win ) if $pretext_width;
-
-      $win->print( substrwidth( $text, $pretext_width, $width - $pretext_width - $posttext_width ) );
-      if( $textlen_co < $width - $posttext_width ) {
-         $win->erasech( $width - $posttext_width - $textlen_co );
+         $rb->restore;
       }
 
-      $self->posttext_render( $win ) if $posttext_width;
+      if( my $posttext_width = $self->posttext_width ) {
+         $rb->save;
+         $rb->translate( 0, $cols - $posttext_width );
+         $rb->clip( Tickit::Rect->new( top => 0, left => 0, lines => 1, cols => $posttext_width ) );
+
+         $self->posttext_render( $rb );
+
+         $rb->restore;
+      }
    }
 
-   foreach my $line ( $rect->top + 1 .. $win->lines - 1 ) {
-      $win->clearline( $line );
+   foreach my $line ( max( 1, $rect->top ) .. min( $rect->bottom-1, $self->window->lines-1 ) ) {
+      $rb->erase_at( $line, 0, $cols );
    }
 
    $self->reposition_cursor;
@@ -431,6 +439,8 @@ sub on_key
 {
    my $self = shift;
    my ( $args ) = @_;
+
+   return 0 unless $self->window->is_focused;
 
    my $type = $args->type;
    my $str  = $args->str;

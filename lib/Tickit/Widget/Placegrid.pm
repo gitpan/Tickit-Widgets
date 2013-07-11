@@ -12,7 +12,7 @@ use base qw( Tickit::Widget );
 use Tickit::Style;
 use Tickit::RenderBuffer qw( LINE_SINGLE LINE_THICK );
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 use Tickit::Utils qw( textwidth );
 
@@ -84,21 +84,14 @@ sub new
 sub lines { 1 }
 sub cols  { 1 }
 
-use constant CLEAR_BEFORE_RENDER => 0;
-sub render {
+sub render_to_rb
+{
    my $self = shift;
-   my %args = @_;
-   my $win = $self->window or return;
-
-   my $rb = Tickit::RenderBuffer->new(
-      lines => $win->lines,
-      cols  => $win->cols,
-   );
-   $rb->clip($args{rect});
+   my ( $rb, $rect ) = @_;
 
    $rb->clear($self->pen);
 
-   my ($w, $h) = map $win->$_ - 1, qw(cols lines);
+   my ($w, $h) = map $self->window->$_ - 1, qw(cols lines);
 
    $rb->setpen($self->get_style_pen("grid"));
    $rb->hline_at(0, 0, $w, LINE_THICK);
@@ -114,10 +107,8 @@ sub render {
       $rb->text_at(($h / 2) - 1, (1 + $w - textwidth($title)) / 2, $title);
    }
 
-   my $txt = '(' . $win->cols . ',' . $win->lines . ')';
+   my $txt = '(' . $self->window->cols . ',' . $self->window->lines . ')';
    $rb->text_at($h / 2, (1 + $w - textwidth($txt)) / 2, $txt);
-
-   $rb->flush_to_window($win);
 }
 
 =head1 AUTHOR

@@ -11,8 +11,9 @@ use base qw( Tickit::Widget );
 use Tickit::Style;
 use Tickit::RenderBuffer qw( LINE_SINGLE );
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
+use List::Util qw( min max );
 use Tickit::Utils qw( textwidth );
 
 use constant CAN_FOCUS => 1;
@@ -69,19 +70,36 @@ Set when the mouse is being held over the button, before it is released
 
 =back
 
+The following style actions are used:
+
+=over 4
+
+=item click
+
+The main action to activate the C<on_click> handler.
+
+=back
+
 =cut
 
 style_definition base =>
    fg => "black",
    bg => "blue",
    marker_left => "> ",
-   marker_right => " <";
+   marker_right => " <",
+   '<Enter>' => "click";
 
-style_definition ':active' =>
+style_definition ':focus' =>
    marker_left => ">>",
    marker_right => "<<";
 
+style_definition ':active' =>
+   rv => 1;
+
+style_redraw_keys qw( marker_left marker_right );
+
 use constant WIDGET_PEN_FROM_STYLE => 1;
+use constant KEYPRESSES_FROM_STYLE => 1;
 
 =head1 CONSTRUCTOR
 
@@ -184,6 +202,25 @@ sub set_on_click
    ( $self->{on_click} ) = @_;
 }
 
+sub activate
+{
+   my $self = shift;
+   $self->{on_click}->( $self );
+}
+
+# Activation by key should "flash" the button briefly on the screen as a
+# visual feedback
+sub key_click
+{
+   my $self = shift;
+   $self->activate;
+   if( my $window = $self->window ) {
+      $self->set_style_tag( active => 1 );
+      $window->tickit->timer( after => 0.1, sub { $self->set_style_tag( active => 0 ) } );
+   }
+   return 1;
+}
+
 =head2 $align = $button->align
 
 =head2 $button->set_align( $align )
@@ -200,48 +237,49 @@ the button area. See also L<Tickit::WidgetRole::Alignable>.
 use Tickit::WidgetRole::Alignable name => "align",  style => "h";
 use Tickit::WidgetRole::Alignable name => "valign", style => "v";
 
-use constant CLEAR_BEFORE_RENDER => 0;
-sub render
+sub reshape
 {
    my $self = shift;
-   my %args = @_;
 
    my $win = $self->window or return;
-   $win->is_visible or return;
-   my $rect = $args{rect};
-
    my $lines = $win->lines;
    my $cols  = $win->cols;
-   my $rb = Tickit::RenderBuffer->new( lines => $lines, cols => $cols );
-   $rb->clip( $rect );
-   $rb->setpen( $self->pen );
 
-   my $label = $self->label;
-   my $width = textwidth $label;
-
-   my ( $marker_left, $marker_right ) = $self->get_style_values( "marker_left", "marker_right" );
+   my $width = textwidth $self->label;
 
    my ( $lines_before, undef, $lines_after ) = $self->_valign_allocation( 1, $lines - 2 );
    my ( $cols_before, undef, $cols_after ) = $self->_align_allocation( $width + 2, $cols - 2 );
+
+   $self->{label_line} = $lines_before + 1;
+   $self->{label_col}  = $cols_before + 2;
+   $self->{label_end}  = $cols_before + $width + 2;
+
+   $win->cursor_at( $self->{label_line}, $self->{label_col} );
+}
+
+sub render_to_rb
+{
+   my $self = shift;
+   my ( $rb, $rect ) = @_;
+
+   my $win = $self->window or return;
+   my $lines = $win->lines;
+   my $cols  = $win->cols;
 
    $rb->hline_at( 0,        0, $cols-1, LINE_SINGLE );
    $rb->hline_at( $lines-1, 0, $cols-1, LINE_SINGLE );
    $rb->vline_at( 0, $lines-1, 0,       LINE_SINGLE );
    $rb->vline_at( 0, $lines-1, $cols-1, LINE_SINGLE );
 
-   foreach my $line ( 1 .. $lines-2 ) {
+   foreach my $line ( max( $rect->top, 1 ) .. min( $lines-2, $rect->bottom-1 ) ) {
       $rb->erase_at( $line, 1, $cols-2 );
    }
-   my $label_line = $lines_before + 1;
 
-   $rb->text_at( $label_line, $cols_before, $marker_left );
-   $rb->text_at( $label_line, $cols-2 - $cols_after, $marker_right );
+   my ( $marker_left, $marker_right ) = $self->get_style_values( "marker_left", "marker_right" );
+   $rb->text_at( $self->{label_line}, $self->{label_col} - 2, $marker_left );
+   $rb->text_at( $self->{label_line}, $self->{label_end}, $marker_right );
 
-   $rb->text_at( $label_line, $cols_before + 2, $label );
-
-   $rb->flush_to_window( $win );
-
-   $win->cursor_at( $label_line, $cols_before + 2 );
+   $rb->text_at( $self->{label_line}, $self->{label_col}, $self->label );
 }
 
 sub on_mouse
@@ -254,12 +292,10 @@ sub on_mouse
 
    if( $type eq "press" and $button == 1 ) {
       $self->set_style_tag( active => 1 );
-      $self->redraw;
    }
    if( $type eq "release" and $button == 1 ) {
       $self->set_style_tag( active => 0 );
-      $self->{on_click}->( $self );
-      $self->redraw;
+      $self->activate;
    }
 }
 

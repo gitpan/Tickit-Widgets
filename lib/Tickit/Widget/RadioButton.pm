@@ -9,9 +9,8 @@ use strict;
 use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
-use Tickit::RenderBuffer;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 use Carp;
 
@@ -95,7 +94,8 @@ style_definition base =>
    tick_fg => "hi-white",
    tick_b  => 1,
    tick    => "( )",
-   spacing => 2;
+   spacing => 2,
+   '<Space>' => "activate";
 
 style_definition ':active' =>
    b        => 1,
@@ -106,6 +106,7 @@ style_reshape_keys qw( spacing );
 style_reshape_textwidth_keys qw( tick );
 
 use constant WIDGET_PEN_FROM_STYLE => 1;
+use constant KEYPRESSES_FROM_STYLE => 1;
 
 =head1 CONSTRUCTOR
 
@@ -209,6 +210,7 @@ one.
 
 =cut
 
+*key_activate = \&activate;
 sub activate
 {
    my $self = shift;
@@ -221,6 +223,7 @@ sub activate
    $group->set_active( $self );
 
    $self->set_style_tag( active => 1 );
+   return 1;
 }
 
 =head2 $active = $radiobutton->is_active
@@ -235,29 +238,32 @@ sub is_active
    return $self->group->active == $self;
 }
 
-use constant CLEAR_BEFORE_RENDER => 0;
-sub render
+sub reshape
 {
    my $self = shift;
-   my %args = @_;
+
    my $win = $self->window or return;
 
-   my $rb = Tickit::RenderBuffer->new( lines => $win->lines, cols => $win->cols );
-   $rb->clip( $args{rect} );
-   $rb->setpen( $self->pen );
+   my $tick = $self->get_style_values( "tick" );
+
+   $win->cursor_at( 0, ( textwidth( $tick )-1 ) / 2 );
+}
+
+sub render_to_rb
+{
+   my $self = shift;
+   my ( $rb, $rect ) = @_;
 
    $rb->clear;
+
+   return if $rect->top > 0;
 
    $rb->goto( 0, 0 );
 
    $rb->text( my $tick = $self->get_style_values( "tick" ), $self->get_style_pen( "tick" ) );
    $rb->erase( $self->get_style_values( "spacing" ) );
    $rb->text( $self->{label} );
-   $rb->erase_to( $win->cols );
-
-   $rb->flush_to_window( $win );
-
-   $win->cursor_at( 0, ( textwidth( $tick )-1 ) / 2 );
+   $rb->erase_to( $rect->right );
 }
 
 sub on_mouse

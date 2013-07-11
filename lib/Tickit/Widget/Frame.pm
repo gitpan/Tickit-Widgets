@@ -12,7 +12,7 @@ use Tickit::Style;
 
 use Tickit::WidgetRole::Alignable name => "title_align";
 
-our $VERSION = '0.27';
+our $VERSION = '0.28';
 
 use Carp;
 
@@ -79,6 +79,8 @@ by all terminals or fonts.
 
 style_definition base =>
    linetype => "ascii";
+
+style_redraw_keys qw( linetype );
 
 use constant WIDGET_PEN_FROM_STYLE => 1;
 
@@ -179,38 +181,6 @@ sub linetype
    return scalar $self->get_style_values( "linetype" );
 }
 
-# Legacy but undocumented wrappers for the old name of the attribute
-
-sub style
-{
-   my $self = shift;
-   return $self->linetype;
-}
-
-sub set_style
-{
-   my $self = shift;
-   if( @_ == 1 ) {
-      $self->SUPER::set_style( linetype => $_[0] );
-   }
-   else {
-      $self->SUPER::set_style( @_ );
-   }
-}
-
-sub on_style_changed_values
-{
-   my $self = shift;
-   my %values = @_;
-
-   foreach (qw( linetype )) {
-      next if !$values{$_};
-
-      $self->redraw;
-      return;
-   }
-}
-
 =head2 $title = $frame->title
 
 =cut
@@ -275,60 +245,55 @@ sub reshape
    }
 }
 
-use constant CLEAR_BEFORE_RENDER => 0;
-sub render
+sub render_to_rb
 {
    my $self = shift;
-   my %args = @_;
+   my ( $rb, $rect ) = @_;
 
-   my $win = $self->window or return;
-   $win->is_visible or return;
-   my $rect = $args{rect};
-
-   my $cols  = $win->cols;
-   my $lines = $win->lines;
+   my $cols  = $self->window->cols;
+   my $lines = $self->window->lines;
 
    my $linechars = $LINECHARS{$self->linetype};
 
-   my $framepen = $self->get_style_pen( "frame" );
+   $rb->setpen( $self->get_style_pen( "frame" ) );
 
    foreach my $line ( $rect->linerange ) {
-      $win->goto( $line, 0 );
+      $rb->goto( $line, 0 );
 
       if( $line == 0 ) {
          # Top line
+         $rb->text( $linechars->[CORNER_TL] );
+
          if( defined( my $title = $self->title ) ) {
             # At most we can fit $cols-4 columns of title
             my ( $left, $titlewidth, $right ) = $self->_title_align_allocation( textwidth( $title ), $cols - 4 );
 
-            $win->print( $linechars->[CORNER_TL] . ( $linechars->[TOP] x $left ) . " ", $framepen );
-            $win->print( $title, $framepen );
-            $win->print( " " . ( $linechars->[TOP] x $right ) . $linechars->[CORNER_TR], $framepen ) if $cols > 1;
+            $rb->text( $linechars->[TOP] x $left ) if $left > 0;
+            $rb->text( " " );
+            $rb->text( $title );
+            $rb->text( " " );
+            $rb->text( $linechars->[TOP] x $right ) if $right > 0;
          }
          else {
-            my $str = $linechars->[CORNER_TL];
-            $str .= $linechars->[TOP] x ($cols - 2) if $cols > 2;
-            $str .= $linechars->[CORNER_TR] if $cols > 1;
-
-            $win->print( $str, $framepen );
+            $rb->text( $linechars->[TOP] x ($cols - 2) ) if $cols > 2;
          }
+
+         $rb->text( $linechars->[CORNER_TR] ) if $cols > 1;
       }
       elsif( $line < $lines - 1 ) {
          # Middle line
-         $win->print( $linechars->[LEFT], $framepen );
+         $rb->text( $linechars->[LEFT] );
 
          next if $cols == 1;
 
-         $win->goto( $line, $cols - 1 );
-         $win->print( $linechars->[RIGHT], $framepen );
+         $rb->skip_to( $cols - 1 );
+         $rb->text( $linechars->[RIGHT] );
       }
       else {
          # Bottom line
-         my $str = $linechars->[CORNER_BL];
-         $str .= $linechars->[BOTTOM] x ($cols - 2) if $cols > 2;
-         $str .= $linechars->[CORNER_BR] if $cols > 1;
-
-         $win->print( $str, $framepen );
+         $rb->text( $linechars->[CORNER_BL] );
+         $rb->text( $linechars->[BOTTOM] x ($cols - 2) ) if $cols > 2;
+         $rb->text( $linechars->[CORNER_BR] ) if $cols > 1;
       }
    }
 }

@@ -9,9 +9,8 @@ use strict;
 use warnings;
 use base qw( Tickit::SingleChildWidget );
 use Tickit::Style;
-use Tickit::RenderBuffer;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 use constant WIDGET_PEN_FROM_STYLE => 1;
 
@@ -255,21 +254,14 @@ sub reshape
    }
 }
 
-use constant CLEAR_BEFORE_RENDER => 0;
-sub render
+sub render_to_rb
 {
    my $self = shift;
-   my %args = @_;
+   my ( $rb, $rect ) = @_;
 
    my $win = $self->window or return;
-   $win->is_visible or return;
-   my $rect = $args{rect};
-
    my $lines = $win->lines;
    my $cols  = $win->cols;
-   my $rb = Tickit::RenderBuffer->new( lines => $lines, cols => $cols );
-   $rb->clip( $rect );
-   $rb->setpen( $self->pen );
 
    foreach my $line ( $rect->top .. $self->top_border - 1 ) {
       $rb->erase_at( $line, 0, $cols );
@@ -280,7 +272,7 @@ sub render
    my $right_border_at = $cols - $right_border;
    my $bottom_border_at = $lines - $self->bottom_border;
 
-   if( $self->child and $left_border + $right_border < $win->cols ) {
+   if( $self->child and $left_border + $right_border < $cols ) {
       foreach my $line ( $self->top_border .. $bottom_border_at ) {
          if( $left_border > 0 ) {
             $rb->erase_at( $line, 0, $left_border );
@@ -292,16 +284,14 @@ sub render
       }
    }
    else {
-      foreach my $line ( $self->top_border .. $win->lines - $self->bottom_border - 1 ) {
+      foreach my $line ( $self->top_border .. $lines - $self->bottom_border - 1 ) {
          $rb->erase_at( $line, 0, $cols );
       }
    }
 
-   foreach my $line ( $win->lines - $self->bottom_border .. $rect->bottom - 1 ) {
+   foreach my $line ( $lines - $self->bottom_border .. $rect->bottom - 1 ) {
       $rb->erase_at( $line, 0, $cols );
    }
-
-   $rb->flush_to_window( $win );
 }
 
 =head1 AUTHOR

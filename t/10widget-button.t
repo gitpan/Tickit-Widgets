@@ -39,9 +39,9 @@ pressmouse( press => 1, 1, 10 );
 
 flush_tickit;
 
-is_display( [ [TEXT("┌────────────┐",fg=>0,bg=>4)],
-              [TEXT("│>>Click me<<│",fg=>0,bg=>4)],
-              [TEXT("└────────────┘",fg=>0,bg=>4)] ],
+is_display( [ [TEXT("┌────────────┐",fg=>0,bg=>4,rv=>1)],
+              [TEXT("│>>Click me<<│",fg=>0,bg=>4,rv=>1)],
+              [TEXT("└────────────┘",fg=>0,bg=>4,rv=>1)] ],
             'Display after focus' );
 
 is( $clicked, 0, '$clicked before mouse release' );
@@ -51,10 +51,16 @@ pressmouse( release => 1, 1, 10 );
 flush_tickit;
 
 is_display( [ [TEXT("┌────────────┐",fg=>0,bg=>4)],
-              [TEXT("│> Click me <│",fg=>0,bg=>4)],
+              [TEXT("│>>Click me<<│",fg=>0,bg=>4)],
               [TEXT("└────────────┘",fg=>0,bg=>4)] ],
             'Display after mouse release' );
 
 is( $clicked, 1, '$clicked after mouse release' );
+
+presskey( key => "Enter" );
+
+flush_tickit;
+
+is( $clicked, 2, '$clicked after <Enter> key' );
 
 done_testing;
