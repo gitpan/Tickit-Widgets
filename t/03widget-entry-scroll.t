@@ -10,6 +10,7 @@ use Tickit::Test;
 use Tickit::Widget::Entry;
 
 my $win = mk_window;
+$win->set_expose_after_scroll( 1 );
 
 my $entry = Tickit::Widget::Entry->new(
    text => "A"x70,
@@ -109,10 +110,14 @@ is_termlog( [ SETBG(undef),
               GOTO(0,76),
               SETPEN,
               PRINT("BBBB"),
+              GOTO(0,0),
+              GOTO(0,79),
+              SETPEN(fg => 6),
+              PRINT(">"),
               GOTO(0,0) ],
             'Termlog after ->text_delete 0, 1' );
 
-is_display( [ ("A"x69).("B"x11) ],
+is_display( [ ("A"x69).("B"x10).">" ],
             'Display after ->text_delete 0, 1' );
 
 is_cursorpos( 0, 0, 'Position after ->text_delete 0, 1' );

@@ -7,13 +7,15 @@ package Tickit::Widget::Button;
 
 use strict;
 use warnings;
+use feature qw( switch );
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 use base qw( Tickit::Widget );
+
 use Tickit::Style;
 use Tickit::RenderBuffer qw( LINE_SINGLE );
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
-use List::Util qw( min max );
 use Tickit::Utils qw( textwidth );
 
 use constant CAN_FOCUS => 1;
@@ -202,7 +204,7 @@ sub set_on_click
    ( $self->{on_click} ) = @_;
 }
 
-sub activate
+sub click
 {
    my $self = shift;
    $self->{on_click}->( $self );
@@ -213,12 +215,20 @@ sub activate
 sub key_click
 {
    my $self = shift;
-   $self->activate;
+   $self->click;
    if( my $window = $self->window ) {
       $self->set_style_tag( active => 1 );
       $window->tickit->timer( after => 0.1, sub { $self->set_style_tag( active => 0 ) } );
    }
    return 1;
+}
+
+sub _activate
+{
+   my $self = shift;
+   my ( $active ) = @_;
+   $self->{active} = $active;
+   $self->set_style_tag( active => $active );
 }
 
 =head2 $align = $button->align
@@ -271,7 +281,7 @@ sub render_to_rb
    $rb->vline_at( 0, $lines-1, 0,       LINE_SINGLE );
    $rb->vline_at( 0, $lines-1, $cols-1, LINE_SINGLE );
 
-   foreach my $line ( max( $rect->top, 1 ) .. min( $lines-2, $rect->bottom-1 ) ) {
+   foreach my $line ( $rect->linerange( 1, $lines-2 ) ) {
       $rb->erase_at( $line, 1, $cols-2 );
    }
 
@@ -290,13 +300,34 @@ sub on_mouse
    my $type = $args->type;
    my $button = $args->button;
 
-   if( $type eq "press" and $button == 1 ) {
-      $self->set_style_tag( active => 1 );
+   return unless $button == 1;
+
+   for( $type ) {
+      when( "press" ) {
+         $self->_activate( 1 );
+      }
+      when( "drag_start" ) {
+         $self->{dragging_on_self} = 1;
+      }
+      when( "drag_stop" ) {
+         $self->{dragging_on_self} = 0;
+      }
+      when( "drag" ) {
+         # TODO: This could be neater with an $arg->srcwin
+         $self->_activate( 1 ) if $self->{dragging_on_self} and !$self->{active};
+      }
+      when( "drag_outside" ) {
+         $self->_activate( 0 ) if $self->{active};
+      }
+      when( "release" ) {
+         if( $self->{active} ) {
+            $self->_activate( 0 );
+            $self->click;
+         }
+      }
    }
-   if( $type eq "release" and $button == 1 ) {
-      $self->set_style_tag( active => 0 );
-      $self->activate;
-   }
+
+   return 1;
 }
 
 =head1 AUTHOR

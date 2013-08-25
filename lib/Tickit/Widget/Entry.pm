@@ -10,10 +10,9 @@ use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 use Tickit::Utils qw( textwidth chars2cols cols2chars substrwidth );
-use List::Util qw( min max );
 
 use constant CAN_FOCUS => 1;
 
@@ -304,7 +303,7 @@ sub render_to_rb
       }
    }
 
-   foreach my $line ( max( 1, $rect->top ) .. min( $rect->bottom-1, $self->window->lines-1 ) ) {
+   foreach my $line ( $rect->linerange( 1, undef ) ) {
       $rb->erase_at( $line, 0, $cols );
    }
 
@@ -389,7 +388,7 @@ sub _text_spliced
 
    if( $delta_co > 0 and !$at_end or
        $delta_co < 0 ) {
-      $win->scrollrect( 0, $pos_x, 1, $win->cols - $pos_x, 0, $delta_co ) or
+      $win->scrollrect( 0, $pos_x, 1, $win->cols - $pos_x, 0, -$delta_co ) or
          $need_reprint = 1;
    }
 

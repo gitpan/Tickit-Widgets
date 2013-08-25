@@ -12,12 +12,13 @@ use Tickit::Style;
 
 use Tickit::WidgetRole::Alignable name => "title_align";
 
-our $VERSION = '0.28';
+our $VERSION = '0.29';
 
 use Carp;
 
 use Tickit::Pen;
 use Tickit::Utils qw( textwidth substrwidth );
+use Tickit::RenderBuffer qw( LINE_SINGLE LINE_DOUBLE LINE_THICK CAP_START CAP_END );
 
 =head1 NAME
 
@@ -35,7 +36,9 @@ C<Tickit::Widget::Frame> - draw a frame around another widget
     valign => "middle",
  );
 
- my $frame = Tickit::Widget::Frame->new;
+ my $frame = Tickit::Widget::Frame->new(
+    style => { linetype => "single" },
+ );
 
  $frame->add( $hello );
 
@@ -73,6 +76,23 @@ The C<ascii> linetype is default, and uses only the C<-|+> ASCII characters.
 Other linetypes use Unicode box-drawing characters. These may not be supported
 by all terminals or fonts.
 
+=item top_linetype => STRING
+
+=item bottom_linetype => STRING
+
+=item left_linetype => STRING
+
+=item right_linetype => STRING
+
+Overrides the C<linetype> attribute for each side of the frame specifically.
+If two line-drawing styles meet at corners they should be drawn correctly if
+C<Tickit::RenderBuffer> can combine the line segments, but in other
+circumstances the corners are drawn as extensions of the top or bottom line,
+and the left and right lines do not meet it.
+
+Any edge's linetype may be set to C<none> to cause that edge not to have a
+line at all; no extra space will be consumed on that side.
+
 =back
 
 =cut
@@ -80,7 +100,7 @@ by all terminals or fonts.
 style_definition base =>
    linetype => "ascii";
 
-style_redraw_keys qw( linetype );
+style_redraw_keys qw( linetype linetype_top linetype_bottom linetype_left linetype_right );
 
 use constant WIDGET_PEN_FROM_STYLE => 1;
 
@@ -127,6 +147,9 @@ sub new
    $self->set_title( $args{title} ) if defined $args{title};
    $self->set_title_align( $args{title_align} || 0 );
 
+   # Prepopulate has_* caches
+   $self->on_style_changed_values;
+
    return $self;
 }
 
@@ -134,18 +157,39 @@ sub new
 
 =cut
 
+sub on_style_changed_values
+{
+   my $self = shift;
+   my %values = @_;
+
+   my $reshape = 0;
+
+   my $linetype = $values{linetype}[1] // $self->get_style_values( "linetype" );
+
+   # Cache these
+   foreach (qw( top bottom left right )) {
+      no warnings 'uninitialized'; # treat undef as false
+
+      my $new = ( $values{"linetype_$_"}[1] // $linetype ) ne "none";
+      $reshape = 1 if $self->{"has_$_"} != $new;
+      $self->{"has_$_"} = $new;
+   }
+
+   $self->reshape if $reshape;
+}
+
 sub lines
 {
    my $self = shift;
    my $child = $self->child;
-   return ( $child ? $child->lines : 0 ) + 2;
+   return ( $child ? $child->lines : 0 ) + $self->{has_top} + $self->{has_bottom};
 }
 
 sub cols
 {
    my $self = shift;
    my $child = $self->child;
-   return ( $child ? $child->cols : 0 ) + 2;
+   return ( $child ? $child->cols : 0 ) + $self->{has_left} + $self->{has_right};
 }
 
 use constant {
@@ -164,22 +208,14 @@ use constant {
 
 my %LINECHARS = ( #            TOP     BOTTOM  LEFT    RIGHT   TL      TR      BL      BR
    ascii         => [          '-',    '-',    '|',    '|',    '+',    '+',    '+',    '+' ],
-   single        => [ map chr, 0x2500, 0x2500, 0x2502, 0x2502, 0x250C, 0x2510, 0x2514, 0x2518 ],
-   double        => [ map chr, 0x2550, 0x2550, 0x2551, 0x2551, 0x2554, 0x2557, 0x255A, 0x255D ],
-   thick         => [ map chr, 0x2501, 0x2501, 0x2503, 0x2503, 0x250F, 0x2513, 0x2517, 0x251B ],
    solid_inside  => [ map chr, 0x2584, 0x2580, 0x2590, 0x258C, 0x2597, 0x2596, 0x259D, 0x2598 ],
    solid_outside => [ map chr, 0x2580, 0x2584, 0x258C, 0x2590, 0x259B, 0x259C, 0x2599, 0x259F ],
 );
-
-=head2 $linetype = $frame->linetype
-
-=cut
-
-sub linetype
-{
-   my $self = shift;
-   return scalar $self->get_style_values( "linetype" );
-}
+my %LINESTYLES = (
+   single => LINE_SINGLE,
+   double => LINE_DOUBLE,
+   thick  => LINE_THICK,
+);
 
 =head2 $title = $frame->title
 
@@ -229,12 +265,16 @@ sub reshape
    my $lines = $window->lines;
    my $cols  = $window->cols;
 
-   if( $lines > 2 and $cols > 2 ) {
+   my $extra_lines = $self->{has_top} + $self->{has_bottom};
+   my $extra_cols  = $self->{has_left} + $self->{has_right};
+   if( $lines > $extra_lines and $cols > $extra_cols ) {
+      my @geom = ( $self->{has_top}, $self->{has_left}, $lines - $extra_lines, $cols - $extra_cols );
+
       if( my $childwin = $child->window ) {
-         $childwin->change_geometry( 1, 1, $lines - 2, $cols - 2 );
+         $childwin->change_geometry( @geom );
       }
       else {
-         my $childwin = $window->make_sub( 1, 1, $lines - 2, $cols - 2 );
+         my $childwin = $window->make_sub( @geom );
          $child->set_window( $childwin );
       }
    }
@@ -250,50 +290,91 @@ sub render_to_rb
    my $self = shift;
    my ( $rb, $rect ) = @_;
 
+   $rb->setpen( $self->get_style_pen( "frame" ) );
+
    my $cols  = $self->window->cols;
    my $lines = $self->window->lines;
 
-   my $linechars = $LINECHARS{$self->linetype};
+   my $right  = $cols - 1;
+   my $bottom = $lines - 1;
 
-   $rb->setpen( $self->get_style_pen( "frame" ) );
+   my $linetype = $self->get_style_values( "linetype" );
 
-   foreach my $line ( $rect->linerange ) {
-      $rb->goto( $line, 0 );
+   my $linetype_top    = $self->get_style_values( "linetype_top"    ) // $linetype;
+   my $linetype_bottom = $self->get_style_values( "linetype_bottom" ) // $linetype;
+   my $linetype_left   = $self->get_style_values( "linetype_left"   ) // $linetype;
+   my $linetype_right  = $self->get_style_values( "linetype_right"  ) // $linetype;
 
-      if( $line == 0 ) {
-         # Top line
-         $rb->text( $linechars->[CORNER_TL] );
+   my $top_is_line    = defined $LINESTYLES{$linetype_top};
+   my $bottom_is_line = defined $LINESTYLES{$linetype_bottom};
+   my $left_is_line   = defined $LINESTYLES{$linetype_left};
+   my $right_is_line  = defined $LINESTYLES{$linetype_right};
 
-         if( defined( my $title = $self->title ) ) {
-            # At most we can fit $cols-4 columns of title
-            my ( $left, $titlewidth, $right ) = $self->_title_align_allocation( textwidth( $title ), $cols - 4 );
+   my $h_caps = ( $left_is_line ? 0 : CAP_START ) | ( $right_is_line  ? 0 : CAP_END );
+   my $v_caps = ( $top_is_line  ? 0 : CAP_START ) | ( $bottom_is_line ? 0 : CAP_END );
+   my $v_start = $top_is_line ? 0 : $self->{has_top};
+   my $v_end   = $bottom_is_line ? $bottom : $bottom - $self->{has_bottom};
 
-            $rb->text( $linechars->[TOP] x $left ) if $left > 0;
-            $rb->text( " " );
-            $rb->text( $title );
-            $rb->text( " " );
-            $rb->text( $linechars->[TOP] x $right ) if $right > 0;
-         }
-         else {
-            $rb->text( $linechars->[TOP] x ($cols - 2) ) if $cols > 2;
-         }
+   my $linechars;
+   my $style;
 
-         $rb->text( $linechars->[CORNER_TR] ) if $cols > 1;
+   # Top
+   if( $rect->top == 0 ) {
+      if( $linechars = $LINECHARS{$linetype_top} ) {
+         $rb->goto( 0, 0 );
+
+         $rb->text( $linechars->[$linetype_top eq $linetype_left  ? CORNER_TL : TOP] );
+         $rb->text( $linechars->[TOP] x ($cols - 2) ) if $cols > 2;
+         $rb->text( $linechars->[$linetype_top eq $linetype_right ? CORNER_TR : TOP] ) if $cols > 1;
       }
-      elsif( $line < $lines - 1 ) {
-         # Middle line
-         $rb->text( $linechars->[LEFT] );
-
-         next if $cols == 1;
-
-         $rb->skip_to( $cols - 1 );
-         $rb->text( $linechars->[RIGHT] );
+      elsif( $style = $LINESTYLES{$linetype_top} ) {
+         $rb->hline_at( 0, 0, $right, $style, undef, $h_caps );
       }
-      else {
-         # Bottom line
-         $rb->text( $linechars->[CORNER_BL] );
+
+      if( defined( my $title = $self->title ) ) {
+         my $cols = $self->window->cols;
+
+         # At most we can fit $cols-4 columns of title
+         my ( $left, $titlewidth, $right ) = $self->_title_align_allocation( textwidth( $title ), $cols - 4 );
+
+         $rb->goto( 0, 1 + $left );
+
+         $rb->text( " " );
+         $rb->text( $title );
+         $rb->text( " " );
+      }
+   }
+
+   # Left
+   if( $rect->left == 0 ) {
+      if( $linechars = $LINECHARS{$linetype_left} ) {
+         $rb->text_at( $_, 0, $linechars->[LEFT] ) for 1 .. $bottom-1;
+      }
+      elsif( $style = $LINESTYLES{$linetype_left} ) {
+         $rb->vline_at( $v_start, $v_end, 0, $style, undef, $v_caps );
+      }
+   }
+   # Right
+   if( $rect->right == $cols and $cols > 1 ) {
+      if( $linechars = $LINECHARS{$linetype_right} ) {
+         $rb->text_at( $_, $right, $linechars->[RIGHT] ) for 1 .. $bottom-1;
+      }
+      elsif( $style = $LINESTYLES{$linetype_right} ) {
+         $rb->vline_at( $v_start, $v_end, $right, $style, undef, $v_caps );
+      }
+   }
+
+   # Bottom
+   if( $rect->bottom == $lines and $lines > 1 ) {
+      if( $linechars = $LINECHARS{$linetype_bottom} ) {
+         $rb->goto( $bottom, 0 );
+
+         $rb->text( $linechars->[$linetype_bottom eq $linetype_left  ? CORNER_BL : BOTTOM] );
          $rb->text( $linechars->[BOTTOM] x ($cols - 2) ) if $cols > 2;
-         $rb->text( $linechars->[CORNER_BR] ) if $cols > 1;
+         $rb->text( $linechars->[$linetype_bottom eq $linetype_right ? CORNER_BR : BOTTOM] ) if $cols > 1;
+      }
+      elsif( $style = $LINESTYLES{$linetype_bottom} ) {
+         $rb->hline_at( $bottom, 0, $right, $style, undef, $h_caps );
       }
    }
 }

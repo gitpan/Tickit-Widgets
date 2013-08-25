@@ -50,7 +50,6 @@ SKIP: {
 $widget->set_style( linetype => "ascii" );
 
 $widget->set_title( "Title" );
-
 flush_tickit;
 
 is_display( [ [TEXT("+ Title ".("-"x71)."+")],
@@ -60,7 +59,6 @@ is_display( [ [TEXT("+ Title ".("-"x71)."+")],
             'Display with title' );
 
 $widget->set_title_align( "right" );
-
 flush_tickit;
 
 is_display( [ [TEXT("+".("-"x71)." Title +")],
@@ -70,7 +68,6 @@ is_display( [ [TEXT("+".("-"x71)." Title +")],
             'Display with right-aligned title' );
 
 $widget->set_style( frame_fg => "red" );
-
 flush_tickit;
 
 is_display( [ [TEXT("+".("-"x71)." Title +",fg=>1)],
@@ -80,7 +77,6 @@ is_display( [ [TEXT("+".("-"x71)." Title +",fg=>1)],
             'Display with correct pen' );
 
 $static->set_text( "New text" );
-
 flush_tickit;
 
 is_display( [ [TEXT("+".("-"x71)." Title +",fg=>1)],
@@ -88,6 +84,65 @@ is_display( [ [TEXT("+".("-"x71)." Title +",fg=>1)],
               ( [TEXT("|",fg=>1), BLANK(78), TEXT("|",fg=>1)] ) x 22,
               [TEXT("+".("-"x78)."+",fg=>1)] ],
             'Display after $static->set_text' );
+
+$widget->set_title( undef );
+$widget->set_style( frame_fg => undef );
+
+# Mixed linetypes
+{
+   $widget->set_style(
+      linetype_top    => "double",
+      linetype_bottom => "double",
+      linetype_left   => "single",
+      linetype_right  => "single",
+   );
+   flush_tickit;
+
+   is_display( [ [TEXT("\x{2552}".("\x{2550}"x78)."\x{2555}")],
+                 [TEXT("\x{2502}New text".(" "x70)."\x{2502}")],
+                 ( [TEXT("\x{2502}"), BLANK(78), TEXT("\x{2502}")] ) x 22,
+                 [TEXT("\x{2558}".("\x{2550}"x78)."\x{255b}")] ],
+               'Display with mixed line styles' );
+
+   $widget->set_style(
+      linetype_left   => "solid_outside",
+      linetype_right  => "solid_outside",
+   );
+   flush_tickit;
+
+   is_display( [ [TEXT("\x{2550}"x80)],
+                 [TEXT("\x{258c}New text".(" "x70)."\x{2590}")],
+                 ( [TEXT("\x{258c}"), BLANK(78), TEXT("\x{2590}")] ) x 22,
+                 [TEXT("\x{2550}"x80)] ],
+               'Display with mixed line types' );
+}
+
+# Missing linetypes
+{
+   $widget->set_style(
+      linetype_left  => "none",
+      linetype_right => "none",
+   );
+   flush_tickit;
+
+   is_display( [ [TEXT("\x{2550}"x80)],
+                 [TEXT("New text".(" "x72))],
+                 ( [BLANK(80)] ) x 22,
+                 [TEXT("\x{2550}"x80)] ],
+               'Display with left/right as none' );
+
+   $widget->set_style(
+      linetype_top    => "none",
+      linetype_bottom => "none",
+      linetype_left   => "single",
+      linetype_right  => "single",
+   );
+   flush_tickit;
+
+   is_display( [ [TEXT("\x{2502}New text".(" "x70)."\x{2502}")],
+                 ( [TEXT("\x{2502}"), BLANK(78), TEXT("\x{2502}")] ) x 24 ],
+               'Display with top/bottom as none' );
+}
 
 $widget->set_window( undef );
 

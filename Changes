@@ -1,5 +1,16 @@
 Revision history for Tickit-Widgets
 
+0.11    CHANGES:
+         * Use Tickit dragging events to better handle mouse click/release on
+           Button
+         * Use Tickit::RenderBuffer to render Frame
+         * Allow differing or absent line styles per Frame edge
+         * Allow GridBox to be initialised by child widgets given in a 2D
+           array
+
+        BUGFIXES:
+         * Bugfix for scrollrect ICH/DCH fix
+
 0.10    CHANGES:
          * Implement key actions in Button, CheckButton, RadioButton
          * Neater visual style for Button; indicate focus vs. active

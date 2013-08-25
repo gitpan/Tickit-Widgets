@@ -10,6 +10,7 @@ use Tickit::Test;
 use Tickit::Widget::Entry;
 
 my $win = mk_window;
+$win->set_expose_after_scroll( 1 );
 
 my $entry = Tickit::Widget::Entry->new;
 
@@ -171,6 +172,7 @@ drain_termlog;
 # work
 {
    my $subwin = $win->make_sub( 2, 2, $win->lines - 4, $win->cols - 4 );
+   $subwin->set_expose_after_scroll( 1 );
 
    $entry->set_window( $subwin );
    $entry->take_focus;
@@ -201,6 +203,11 @@ drain_termlog;
                  ERASECH(58),
                  GOTO(2,2),
                  GOTO(2,9),
+                 GOTO(2,2),
+                 SETBG(undef),
+                 PRINT("And Different text"),
+                 SETBG(undef),
+                 ERASECH(58),
                  GOTO(2,9) ], # TODO: Maybe these can be made more efficient?
                'Termlog after ->text_insert in subwindow' );
 

@@ -11,11 +11,11 @@ use base qw( Tickit::Widget::LinearSplit );
 use Tickit::Style;
 use Tickit::RenderBuffer qw( LINE_SINGLE CAP_BOTH );
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 use Carp;
 
-use List::Util qw( sum min max );
+use List::Util qw( sum max );
 
 =head1 NAME
 
@@ -190,7 +190,7 @@ sub render_to_rb
 
    $rb->hline_at( $self->{split_at}, 0, $cols-1, LINE_SINGLE, undef, CAP_BOTH );
 
-   foreach my $line ( max( $rect->top, 1 ) .. min( $split_len-2, $rect->bottom-1 ) ) {
+   foreach my $line ( $rect->linerange( 1, $split_len-2 ) ) {
       $rb->erase_at( $self->{split_at} + $line, 0, $cols );
    }
 

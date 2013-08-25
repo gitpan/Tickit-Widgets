@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::ContainerWidget );
 use Tickit::Style;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 use Carp;
 
@@ -24,7 +24,7 @@ C<Tickit::Widget::GridBox> - lay out a set of child widgets in a grid
 
 =head1 SYNOPSIS
 
- use Tickit:
+ use Tickit;
  use Tickit::Widget::GridBox;
  use Tickit::Widget::Static;
 
@@ -33,14 +33,13 @@ C<Tickit::Widget::GridBox> - lay out a set of child widgets in a grid
        col_spacing => 2,
        row_spacing => 1,
     },
+    children => [
+      [ Tickit::Widget::Static->new( text => "top left" ),
+        Tickit::Widget::Static->new( text => "top right" ) ],
+      [ Tickit::Widget::Static->new( text => "bottom left" ),
+        Tickit::Widget::Static->new( text => "bottom right" ) ],
+    ],
  );
-
- $gridbox->add( 0, 0, Tickit::Widget::Static->new( text => "top left" ) );
- $gridbox->add( 0, 1, Tickit::Widget::Static->new( text => "top right" ) );
- $gridbox->add( 1, 0, Tickit::Widget::Static->new( text => "bottom left" ) );
- $gridbox->add( 1, 1, Tickit::Widget::Static->new( text => "bottom right" ) );
-
- $tickit->set_row_spacing( $gridbox );
 
  Tickit->new( root => $gridbox )->run;
 
@@ -83,6 +82,18 @@ use constant WIDGET_PEN_FROM_STYLE => 1;
 
 Constructs a new C<Tickit::Widget::GridBox> object.
 
+Takes the following named arguments:
+
+=over 8
+
+=item children => ARRAY[ARRAY[Tickit::Widget]]
+
+Optional. If present, should be a 2D ARRAYref of ARRAYrefs containing the
+C<Tickit::Widget> children to display in the grid. They are all added with no
+additional options.
+
+=back
+
 =cut
 
 sub new
@@ -96,6 +107,14 @@ sub new
 
    $self->{grid} = [];
    $self->{max_col} = 0;
+
+   if( my $children = $args{children} ) {
+      foreach my $row ( 0 .. $#$children ) {
+         foreach my $col ( 0 .. $#{ $children->[$row] } ) {
+            $self->add( $row, $col, $children->[$row][$col] );
+         }
+      }
+   }
 
    return $self;
 }
@@ -323,9 +342,7 @@ sub render_to_rb
    my $self = shift;
    my ( $rb, $rect ) = @_;
 
-   foreach my $line ( $rect->linerange ) {
-      $rb->erase_at( $line, $rect->left, $rect->cols );
-   }
+   $rb->eraserect( $rect );
 }
 
 =head1 AUTHOR
