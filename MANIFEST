@@ -8,6 +8,7 @@ examples/demo-frame.pl
 examples/demo-gridbox.pl
 examples/demo-hsplit.pl
 examples/demo-radiobutton.pl
+examples/demo-spinner.pl
 examples/demo-vsplit.pl
 lib/Tickit/Widget/Border.pm
 lib/Tickit/Widget/Button.pm
@@ -19,6 +20,7 @@ lib/Tickit/Widget/HSplit.pm
 lib/Tickit/Widget/LinearSplit.pm
 lib/Tickit/Widget/Placegrid.pm
 lib/Tickit/Widget/RadioButton.pm
+lib/Tickit/Widget/Spinner.pm
 lib/Tickit/Widget/VSplit.pm
 lib/Tickit/Widgets.pm
 LICENSE
@@ -39,4 +41,5 @@ t/21widget-border.t
 t/23widget-gridbox.t
 t/24widget-hsplit.t
 t/24widget-vsplit.t
+t/30widget-spinner.t
 t/99pod.t

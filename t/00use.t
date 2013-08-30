@@ -16,6 +16,7 @@ use_ok( 'Tickit::Widget::GridBox' );
 use_ok( 'Tickit::Widget::HSplit' );
 use_ok( 'Tickit::Widget::Placegrid' );
 use_ok( 'Tickit::Widget::RadioButton' );
+use_ok( 'Tickit::Widget::Spinner' );
 use_ok( 'Tickit::Widget::VSplit' );
 
 done_testing;

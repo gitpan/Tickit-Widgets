@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 use Carp;
 
@@ -31,7 +31,7 @@ C<Tickit::Widget::CheckButton> - a widget allowing a toggle true/false option
 
  my $vbox = Tickit::Widget::VBox->new;
  $vbox->add( Tickit::Widget::CheckButton->new(
-       caption => "Check button $_",
+       label => "Check button $_",
  ) ) for 1 .. 5;
 
  Tickit->new( root => $vbox )->run;
