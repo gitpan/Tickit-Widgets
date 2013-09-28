@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use Carp;
 
@@ -88,6 +88,16 @@ Set when this button is the active one of the group.
 
 =back
 
+The following style actions are used:
+
+=over 4
+
+=item activate
+
+The main action to activate the C<on_click> handler.
+
+=back
+
 =cut
 
 style_definition base =>
@@ -130,6 +140,11 @@ Optional. If supplied, the group that the button should belong to. If not
 supplied, a new group will be constructed that can be accessed using the
 C<group> accessor.
 
+=item value => SCALAR
+
+Optional. If supplied, used to set the button's identification value, which
+is passed to the group's C<on_changed> callback.
+
 =back
 
 =cut
@@ -141,7 +156,10 @@ sub new
 
    my $self = $class->SUPER::new( %args );
 
-   $self->{label} = $args{label};
+   $self->set_label( $args{label} ) if defined $args{label};
+   $self->set_on_toggle( $args{on_toggle} ) if $args{on_toggle};
+   $self->set_value( $args{value} ) if defined $args{value};
+
    $self->{group} = $args{group} || Tickit::Widget::RadioButton::Group->new;
 
    return $self;
@@ -199,6 +217,58 @@ sub set_label
    $self->redraw;
 }
 
+=head2 $on_toggle = $radiobutton->on_toggle
+
+=cut
+
+sub on_toggle
+{
+   my $self = shift;
+   return $self->{on_toggle};
+}
+
+=head2 $radiobutton->set_on_toggle( $on_toggle )
+
+Return or set the CODE reference to be called when the button state is
+changed.
+
+ $on_toggle->( $radiobutton, $active )
+
+When the radio tick mark moves from one button to another, the old button is
+marked unactive before the new one is marked active.
+
+=cut
+
+sub set_on_toggle
+{
+   my $self = shift;
+   ( $self->{on_toggle} ) = @_;
+}
+
+=head2 $value = $radiobutton->value
+
+=cut
+
+sub value
+{
+   my $self = shift;
+   return $self->{value};
+}
+
+=head2 $radiobutton->set_value( $value )
+
+Return or set the scalar value used to identify the radio button to the
+group's C<on_changed> callback. This can be any scalar value; it is simply
+stored by the button and not otherwise used.
+
+=cut
+
+sub set_value
+{
+   my $self = shift;
+   ( $self->{value} ) = @_;
+}
+
 =head1 METHODS
 
 =cut
@@ -218,11 +288,14 @@ sub activate
 
    if( my $old = $group->active ) {
       $old->set_style_tag( active => 0 );
+      $old->{on_toggle}->( $old, 0 ) if $old->{on_toggle};
    }
 
    $group->set_active( $self );
 
    $self->set_style_tag( active => 1 );
+   $self->{on_toggle}->( $self, 1 ) if $self->{on_toggle};
+
    return 1;
 }
 
@@ -301,7 +374,7 @@ Returns a new group.
 sub new
 {
    my $class = shift;
-   return bless \(my $self), $class;
+   return bless [ undef, undef ], $class;
 }
 
 =head2 $radiobutton = $group->active
@@ -313,13 +386,42 @@ Returns the button which is currently active in the group
 sub active
 {
    my $self = shift;
-   return $$self;
+   return $self->[0];
 }
 
 sub set_active
 {
    my $self = shift;
-   ( $$self ) = @_;
+   ( $self->[0] ) = @_;
+   $self->[1]->( $self->active, $self->active->value ) if $self->[1];
+}
+
+=head2 $on_changed = $group->on_changed
+
+=cut
+
+sub on_changed
+{
+   my $self = shift;
+   return $self->[1];
+}
+
+=head2 $group->set_on_changed( $on_changed )
+
+Return or set the CODE reference to be called when the active member of the
+group changes. This may be more convenient than setting the C<on_toggle>
+callback of each button in the group.
+
+The callback is passed the currently-active button, and its C<value>.
+
+ $on_changed->( $active, $value )
+
+=cut
+
+sub set_on_changed
+{
+   my $self = shift;
+   ( $self->[1] ) = @_;
 }
 
 =head1 AUTHOR

@@ -35,6 +35,19 @@ is_display( [ [TEXT("┌────────────┐",fg=>0,bg=>4)],
               [TEXT("└────────────┘",fg=>0,bg=>4)] ],
             'Display initially' );
 
+{
+   $button->set_style( linetype => "double" );
+
+   flush_tickit;
+
+   is_display( [ [TEXT("╔════════════╗",fg=>0,bg=>4)],
+                 [TEXT("║> Click me <║",fg=>0,bg=>4)],
+                 [TEXT("╚════════════╝",fg=>0,bg=>4)] ],
+               'Display with linetype "double"' );
+
+   $button->set_style( linetype => undef );
+}
+
 pressmouse( press => 1, 1, 10 );
 
 flush_tickit;
@@ -62,5 +75,15 @@ presskey( key => "Enter" );
 flush_tickit;
 
 is( $clicked, 2, '$clicked after <Enter> key' );
+
+{
+   my $button_without_border = Tickit::Widget::Button->new(
+      label => "My label",
+      style => { linetype => "none" },
+   );
+
+   is( $button_without_border->lines, 1, '->lines without border' );
+   is( $button_without_border->cols,  12, '->cols without border' );
+}
 
 done_testing;

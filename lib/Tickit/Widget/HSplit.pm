@@ -11,7 +11,7 @@ use base qw( Tickit::Widget::LinearSplit );
 use Tickit::Style;
 use Tickit::RenderBuffer qw( LINE_SINGLE CAP_BOTH );
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use Carp;
 
@@ -116,10 +116,12 @@ sub new
    my $class = shift;
    my %args = @_;
 
-   $args{A_child} = delete $args{top_child};
-   $args{B_child} = delete $args{bottom_child};
+   my $self = $class->SUPER::new( %args );
 
-   return $class->SUPER::new( %args );
+   $self->set_top_child   ( $args{top_child}    ) if $args{top_child};
+   $self->set_bottom_child( $args{bottom_child} ) if $args{bottom_child};
+
+   return $self;
 }
 
 sub lines
@@ -148,27 +150,25 @@ sub cols
 
 =head2 $child = $hsplit->top_child
 
-Returns the child widget used in the top half of the display.
+=head2 $hsplit->set_top_child( $child )
+
+Accessor for the child widget used in the top half of the display.
 
 =cut
 
-sub top_child
-{
-   my $self = shift;
-   return $self->{A_child};
-}
+*top_child     = __PACKAGE__->can( "A_child" );
+*set_top_child = __PACKAGE__->can( "set_A_child" );
 
 =head2 $child = $hsplit->bottom_child
 
-Returns the child widget used in the bottom half of the display.
+=head2 $hsplit->set_bottom_child( $child )
+
+Accessor for the child widget used in the bottom half of the display.
 
 =cut
 
-sub bottom_child
-{
-   my $self = shift;
-   return $self->{B_child};
-}
+*bottom_child     = __PACKAGE__->can( "B_child" );
+*set_bottom_child = __PACKAGE__->can( "set_B_child" );
 
 sub _make_child_geom
 {

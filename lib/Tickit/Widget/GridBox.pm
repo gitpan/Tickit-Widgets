@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::ContainerWidget );
 use Tickit::Style;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use Carp;
 
@@ -323,6 +323,9 @@ sub reshape
    foreach my $row ( 0 .. $max_row ) {
       foreach my $col ( 0 .. $max_col ) {
          my $child = $self->{grid}[$row][$col] or next;
+
+         # Don't try to use zero-sized rows or cols
+         next unless $rows[$row][1] and $cols[$col][1];
 
          my @geom = ( $rows[$row][0], $cols[$col][0], $rows[$row][1], $cols[$col][1] );
 

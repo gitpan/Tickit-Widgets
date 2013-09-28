@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use Carp;
 
@@ -87,7 +87,7 @@ The following style actions are used:
 
 =over 4
 
-=item click
+=item toggle
 
 The main action to activate the C<on_click> handler.
 
@@ -129,6 +129,10 @@ Takes the following named argmuents
 
 The label text to display alongside this button.
 
+=item on_toggle => CODE
+
+Optional. Callback function to invoke when the check state is changed.
+
 =back
 
 =cut
@@ -140,7 +144,8 @@ sub new
 
    my $self = $class->SUPER::new( %args );
 
-   $self->{label} = $args{label};
+   $self->set_label( $args{label} ) if defined $args{label};
+   $self->set_on_toggle( $args{on_toggle} ) if $args{on_toggle};
 
    return $self;
 }
@@ -185,6 +190,31 @@ sub set_label
    $self->redraw;
 }
 
+=head2 $on_toggle = $checkbutton->on_toggle
+
+=cut
+
+sub on_toggle
+{
+   my $self = shift;
+   return $self->{on_toggle};
+}
+
+=head2 $checkbutton->set_on_toggle( $on_toggle )
+
+Return or set the CODE reference to be called when the button state is
+changed.
+
+ $on_toggle->( $checkbutton, $active )
+
+=cut
+
+sub set_on_toggle
+{
+   my $self = shift;
+   ( $self->{on_toggle} ) = @_;
+}
+
 =head1 METHODS
 
 =cut
@@ -200,6 +230,7 @@ sub activate
    my $self = shift;
    $self->{active} = 1;
    $self->set_style_tag( active => 1 );
+   $self->{on_toggle}->( $self, 1 ) if $self->{on_toggle};
 }
 
 =head2 $checkbutton->deactivate
@@ -213,6 +244,7 @@ sub deactivate
    my $self = shift;
    $self->{active} = 0;
    $self->set_style_tag( active => 0 );
+   $self->{on_toggle}->( $self, 0 ) if $self->{on_toggle};
 }
 
 *key_toggle = \&toggle;

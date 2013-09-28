@@ -12,9 +12,9 @@ no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 use base qw( Tickit::Widget );
 
 use Tickit::Style;
-use Tickit::RenderBuffer qw( LINE_SINGLE );
+use Tickit::RenderBuffer qw( LINE_SINGLE LINE_DOUBLE LINE_THICK );
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use Tickit::Utils qw( textwidth );
 
@@ -52,6 +52,12 @@ used:
 
 =over 4
 
+=item linetype => STRING
+
+What kind of border to draw around the button; one of
+
+ none single double thick
+
 =item marker_left => STRING
 
 A two-character string to place just before the button label
@@ -87,6 +93,7 @@ The main action to activate the C<on_click> handler.
 style_definition base =>
    fg => "black",
    bg => "blue",
+   linetype => "single",
    marker_left => "> ",
    marker_right => " <",
    '<Enter>' => "click";
@@ -98,6 +105,7 @@ style_definition ':focus' =>
 style_definition ':active' =>
    rv => 1;
 
+style_reshape_keys qw( linetype );
 style_redraw_keys qw( marker_left marker_right );
 
 use constant WIDGET_PEN_FROM_STYLE => 1;
@@ -145,13 +153,16 @@ sub new
 
 sub lines
 {
-   return 3;
+   my $self = shift;
+   my $has_border = ( $self->get_style_values( "linetype" ) ) ne "none";
+   return 1 + 2*$has_border;
 }
 
 sub cols
 {
    my $self = shift;
-   return 4 + textwidth $self->label;
+   my $has_border = ( $self->get_style_values( "linetype" ) ) ne "none";
+   return 4 + textwidth( $self->label ) + 2*$has_border;
 }
 
 =head1 ACCESSORS
@@ -257,10 +268,12 @@ sub reshape
 
    my $width = textwidth $self->label;
 
-   my ( $lines_before, undef, $lines_after ) = $self->_valign_allocation( 1, $lines - 2 );
+   my $has_border = ( $self->get_style_values( "linetype" ) ) ne "none";
+
+   my ( $lines_before, undef, $lines_after ) = $self->_valign_allocation( 1, $lines - (2 * $has_border) );
    my ( $cols_before, undef, $cols_after ) = $self->_align_allocation( $width + 2, $cols - 2 );
 
-   $self->{label_line} = $lines_before + 1;
+   $self->{label_line} = $lines_before + $has_border;
    $self->{label_col}  = $cols_before + 2;
    $self->{label_end}  = $cols_before + $width + 2;
 
@@ -276,16 +289,30 @@ sub render_to_rb
    my $lines = $win->lines;
    my $cols  = $win->cols;
 
-   $rb->hline_at( 0,        0, $cols-1, LINE_SINGLE );
-   $rb->hline_at( $lines-1, 0, $cols-1, LINE_SINGLE );
-   $rb->vline_at( 0, $lines-1, 0,       LINE_SINGLE );
-   $rb->vline_at( 0, $lines-1, $cols-1, LINE_SINGLE );
+   my ( $linetype, $marker_left, $marker_right ) =
+      $self->get_style_values(qw( linetype marker_left marker_right ));
 
-   foreach my $line ( $rect->linerange( 1, $lines-2 ) ) {
-      $rb->erase_at( $line, 1, $cols-2 );
+   my $linestyle = $linetype eq "single" ? LINE_SINGLE :
+                   $linetype eq "double" ? LINE_DOUBLE :
+                   $linetype eq "thick"  ? LINE_THICK  :
+                   undef;
+
+   if( defined $linestyle ) {
+      $rb->hline_at( 0,        0, $cols-1, $linestyle );
+      $rb->hline_at( $lines-1, 0, $cols-1, $linestyle );
+      $rb->vline_at( 0, $lines-1, 0,       $linestyle );
+      $rb->vline_at( 0, $lines-1, $cols-1, $linestyle );
+
+      foreach my $line ( $rect->linerange( 1, $lines-2 ) ) {
+         $rb->erase_at( $line, 1, $cols-2 );
+      }
+   }
+   else {
+      foreach my $line ( $rect->linerange( 0, $lines-1 ) ) {
+         $rb->erase_at( $line, 0, $cols );
+      }
    }
 
-   my ( $marker_left, $marker_right ) = $self->get_style_values( "marker_left", "marker_right" );
    $rb->text_at( $self->{label_line}, $self->{label_col} - 2, $marker_left );
    $rb->text_at( $self->{label_line}, $self->{label_end}, $marker_right );
 

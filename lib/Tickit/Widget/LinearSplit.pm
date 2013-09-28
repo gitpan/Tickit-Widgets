@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::ContainerWidget );
 use Tickit::Window 0.32; # needs drag_start
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use Carp;
 
@@ -21,10 +21,37 @@ sub new
 
    my $self = $class->SUPER::new( %args );
 
-   $self->{$_} = delete $args{$_} for qw( A_child B_child );
    $self->{split_fraction} = 0.5;
 
    return $self;
+}
+
+sub A_child
+{
+   my $self = shift;
+   $self->{A_child};
+}
+
+sub set_A_child
+{
+   my $self = shift;
+   my ( $child ) = @_;
+   $self->remove( $self->{A_child} ) if $self->{A_child};
+   $self->add( $self->{A_child} = $child );
+}
+
+sub B_child
+{
+   my $self = shift;
+   $self->{B_child};
+}
+
+sub set_B_child
+{
+   my $self = shift;
+   my ( $child ) = @_;
+   $self->remove( $self->{B_child} ) if $self->{B_child};
+   $self->add( $self->{B_child} = $child );
 }
 
 sub children

@@ -1,5 +1,18 @@
 Revision history for Tickit-Widgets
 
+0.13    2013/09/28 15:01:32
+        [CHANGES]
+         * Added 'on_toggle' to CheckButton (RT88954)
+         * Added 'on_activate' to RadioButton and 'on_changed' to
+           RadioButton::Group (RT88954)
+         * Added 'linetype' style to Button, and allow borderless
+           Buttons (RT88953)
+
+        [BUGFIXES]
+         * Don't try to create zero-sized rows or columns in GridBox
+         * Ensure that VSplit/HSplit correctly obeys the ContainerWidget
+           interface - call ->add and ->remove
+
 0.12    CHANGES:
          * Initial attempt at Tickit::Widget::Spinner
          * Fix SYNOPSIS in CheckButton (RT88294)
