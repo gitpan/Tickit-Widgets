@@ -1,5 +1,13 @@
 Revision history for Tickit-Widgets
 
+0.14    2013/11/09 13:53:58
+        [CHANGES]
+         * Use the new child widget "requested size" API from Tickit 0.40 in
+           containers
+
+        [BUGFIXES]
+         * Remember to re-expose window area of a removed GridBox child
+
 0.13    2013/09/28 15:01:32
         [CHANGES]
          * Added 'on_toggle' to CheckButton (RT88954)

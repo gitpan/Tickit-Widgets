@@ -11,7 +11,7 @@ use base qw( Tickit::Widget::LinearSplit );
 use Tickit::Style;
 use Tickit::RenderBuffer qw( LINE_SINGLE CAP_BOTH );
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use Carp;
 
@@ -128,8 +128,8 @@ sub lines
 {
    my $self = shift;
    return max(
-      $self->{A_child} ? $self->{A_child}->lines : 1,
-      $self->{B_child} ? $self->{B_child}->lines : 1,
+      $self->{A_child} ? $self->{A_child}->requested_lines : 1,
+      $self->{B_child} ? $self->{B_child}->requested_lines : 1,
    );
 }
 
@@ -138,9 +138,9 @@ sub cols
    my $self = shift;
    my $spacing = $self->get_style_values( "spacing" );
    return sum(
-      $self->{A_child} ? $self->{A_child}->cols : 1,
+      $self->{A_child} ? $self->{A_child}->requested_cols : 1,
       $spacing,
-      $self->{B_child} ? $self->{B_child}->cols : 1,
+      $self->{B_child} ? $self->{B_child}->requested_cols : 1,
    );
 }
 

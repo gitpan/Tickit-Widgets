@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::SingleChildWidget );
 use Tickit::Style;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use constant WIDGET_PEN_FROM_STYLE => 1;
 
@@ -82,7 +82,7 @@ sub lines
    my $self = shift;
    my $child = $self->child;
    return $self->top_border +
-          ( $child ? $child->lines : 0 ) +
+          ( $child ? $child->requested_lines : 0 ) +
           $self->bottom_border;
 }
 
@@ -91,7 +91,7 @@ sub cols
    my $self = shift;
    my $child = $self->child;
    return $self->left_border +
-          ( $child ? $child->cols : 0 ) +
+          ( $child ? $child->requested_cols : 0 ) +
           $self->right_border;
 }
 

@@ -9,7 +9,7 @@ my $build = Module::Build->new(
    requires => {
       'Tickit::RenderBuffer' => 0,
       'Tickit::Utils' => '0.29',
-      'Tickit::Widget' => '0.38',
+      'Tickit::Widget' => '0.40', # ->requested_* sizing
       'Tickit::Window' => '0.39', # ->scrollrect ICH/DCH bugfix
       'Tickit::Style' => '0.32'
    },

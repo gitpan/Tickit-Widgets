@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::ContainerWidget );
 use Tickit::Window 0.32; # needs drag_start
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use Carp;
 

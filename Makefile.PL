@@ -9,7 +9,7 @@ WriteMakefile
                    'Tickit::RenderBuffer' => 0,
                    'Tickit::Style' => '0.32',
                    'Tickit::Utils' => '0.29',
-                   'Tickit::Widget' => '0.38',
+                   'Tickit::Widget' => '0.40',
                    'Tickit::Window' => '0.39'
                  },
   'INSTALLDIRS' => 'site',

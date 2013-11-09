@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::ContainerWidget );
 use Tickit::Style;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use Carp;
 
@@ -130,7 +130,7 @@ sub lines
          max map {
             my $c = $_;
             my $child = $self->{grid}[$r][$c];
-            $child ? $child->lines : 0;
+            $child ? $child->requested_lines : 0;
          } 0 .. $max_col
       } 0 .. $max_row ) ) +
       $row_spacing * ( $max_row - 1 );
@@ -147,7 +147,7 @@ sub cols
          max map {
             my $r = $_;
             my $child = $self->{grid}[$r][$c];
-            $child ? $child->cols : 0;
+            $child ? $child->requested_cols : 0;
          } 0 .. $max_row
       } 0 .. $max_col ) ) +
       $col_spacing * ( $max_col - 1 );
@@ -251,6 +251,8 @@ sub remove
 
    $self->{max_col} = max map { $_ ? $#$_ : 0 } @$grid;
 
+   $self->window->expose( $child->window->rect );
+
    $self->SUPER::remove( $child );
 }
 
@@ -276,7 +278,7 @@ sub reshape
       foreach my $col ( 0 .. $max_col ) {
          my $child = $self->{grid}[$row][$col] or next;
 
-         $base   = max $base, $child->lines;
+         $base   = max $base, $child->requested_lines;
          $expand = max $expand, $self->child_opts( $child )->{row_expand};
       }
 
@@ -296,7 +298,7 @@ sub reshape
       foreach my $row ( 0 .. $max_row ) {
          my $child = $self->{grid}[$row][$col] or next;
 
-         $base   = max $base, $child->cols;
+         $base   = max $base, $child->requested_cols;
          $expand = max $expand, $self->child_opts( $child )->{col_expand};
       }
 

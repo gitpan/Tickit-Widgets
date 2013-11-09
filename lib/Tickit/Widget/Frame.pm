@@ -12,7 +12,7 @@ use Tickit::Style;
 
 use Tickit::WidgetRole::Alignable name => "title_align";
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 use Carp;
 
@@ -182,14 +182,14 @@ sub lines
 {
    my $self = shift;
    my $child = $self->child;
-   return ( $child ? $child->lines : 0 ) + $self->{has_top} + $self->{has_bottom};
+   return ( $child ? $child->requested_lines : 0 ) + $self->{has_top} + $self->{has_bottom};
 }
 
 sub cols
 {
    my $self = shift;
    my $child = $self->child;
-   return ( $child ? $child->cols : 0 ) + $self->{has_left} + $self->{has_right};
+   return ( $child ? $child->requested_cols : 0 ) + $self->{has_left} + $self->{has_right};
 }
 
 use constant {
