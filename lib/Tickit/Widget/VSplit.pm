@@ -11,7 +11,7 @@ use base qw( Tickit::Widget::LinearSplit );
 use Tickit::Style;
 use Tickit::RenderBuffer qw( LINE_SINGLE CAP_BOTH );
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 use Carp;
 

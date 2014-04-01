@@ -3,60 +3,60 @@ abstract: 'a collection of Tickit::Widget implementations'
 author:
   - 'Paul Evans <leonerd@leonerd.org.uk>'
 build_requires:
-  Test::More: 0.88
+  Test::More: '0.88'
 dynamic_config: 1
-generated_by: 'Module::Build version 0.4007, CPAN::Meta::Converter version 2.132830'
+generated_by: 'Module::Build version 0.4205, CPAN::Meta::Converter version 2.133380'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
-  version: 1.4
+  version: '1.4'
 name: Tickit-Widgets
 provides:
   Tickit::Widget::Border:
     file: lib/Tickit/Widget/Border.pm
-    version: 0.14
+    version: '0.15'
   Tickit::Widget::Button:
     file: lib/Tickit/Widget/Button.pm
-    version: 0.14
+    version: '0.15'
   Tickit::Widget::CheckButton:
     file: lib/Tickit/Widget/CheckButton.pm
-    version: 0.14
+    version: '0.15'
   Tickit::Widget::Entry:
     file: lib/Tickit/Widget/Entry.pm
-    version: 0.24
+    version: '0.24'
   Tickit::Widget::Frame:
     file: lib/Tickit/Widget/Frame.pm
-    version: 0.30
+    version: '0.30'
   Tickit::Widget::GridBox:
     file: lib/Tickit/Widget/GridBox.pm
-    version: 0.14
+    version: '0.15'
   Tickit::Widget::HSplit:
     file: lib/Tickit/Widget/HSplit.pm
-    version: 0.14
+    version: '0.15'
   Tickit::Widget::LinearSplit:
     file: lib/Tickit/Widget/LinearSplit.pm
-    version: 0.14
+    version: '0.15'
   Tickit::Widget::Placegrid:
     file: lib/Tickit/Widget/Placegrid.pm
-    version: 0.14
+    version: '0.15'
   Tickit::Widget::RadioButton:
     file: lib/Tickit/Widget/RadioButton.pm
-    version: 0.14
+    version: '0.15'
   Tickit::Widget::Spinner:
     file: lib/Tickit/Widget/Spinner.pm
-    version: 0.14
+    version: '0.15'
   Tickit::Widget::VSplit:
     file: lib/Tickit/Widget/VSplit.pm
-    version: 0.14
+    version: '0.15'
   Tickit::Widgets:
     file: lib/Tickit/Widgets.pm
-    version: 0.14
+    version: '0.15'
 requires:
-  Tickit::RenderBuffer: 0
-  Tickit::Style: 0.32
-  Tickit::Utils: 0.29
-  Tickit::Widget: 0.40
-  Tickit::Window: 0.39
+  Tickit::RenderBuffer: '0'
+  Tickit::Style: '0.32'
+  Tickit::Utils: '0.29'
+  Tickit::Widget: '0.40'
+  Tickit::Window: '0.39'
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.14
+version: '0.15'

@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::ContainerWidget );
 use Tickit::Style;
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 use Carp;
 
@@ -251,9 +251,11 @@ sub remove
 
    $self->{max_col} = max map { $_ ? $#$_ : 0 } @$grid;
 
-   $self->window->expose( $child->window->rect );
+   my $childrect = $child->window->rect;
 
    $self->SUPER::remove( $child );
+
+   $self->window->expose( $childrect );
 }
 
 sub reshape
