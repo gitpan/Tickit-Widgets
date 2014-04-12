@@ -20,7 +20,6 @@ is( $entry->text,     "", '$entry->text initially' );
 is( $entry->position, 0,  '$entry->position initially' );
 
 $entry->set_window( $win );
-
 flush_tickit;
 
 is_termlog( [ GOTO(0,0),
@@ -36,13 +35,15 @@ is_display( [],
 is_cursorpos( 0, 0, 'Position initally' );
 
 $entry->text_insert( "Hello", 0 );
+flush_tickit;
 
 is( $entry->text,     "Hello", '$entry->text after ->text_insert' );
 is( $entry->position, 5,       '$entry->position after ->text_insert' );
 
 is_termlog( [ GOTO(0,0),
               SETPEN,
-              PRINT("Hello") ],
+              PRINT("Hello"),
+              GOTO(0,5) ],
             'Termlog after ->text_insert' );
 
 is_display( [ "Hello" ],
@@ -51,13 +52,15 @@ is_display( [ "Hello" ],
 is_cursorpos( 0, 5, 'Position after ->text_insert' );
 
 $entry->text_insert( " ", 0 );
-
 is( $entry->text,     " Hello", '$entry->text after ->text_insert at 0' );
 is( $entry->position, 6,        '$entry->position after ->text_insert at 0' );
 
+flush_tickit;
+
 is_termlog( [ SETBG(undef),
-              GOTO(0,0),
-              INSERTCH(1),
+              ( $Tickit::Test::MockTerm::VERSION >= 0.45 ?
+                  ( SCROLLRECT(0,0,1,80, 0,-1) ) :
+                  ( GOTO(0,0), INSERTCH(1) ) ),
               GOTO(0,0),
               SETPEN,
               PRINT(" "),
@@ -73,9 +76,16 @@ is( $entry->text_delete( 5, 1 ), "o", '$entry->text_delete' );
 is( $entry->text,     " Hell", '$entry->text after ->text_delete' );
 is( $entry->position, 5,       '$entry->position after ->text_delete' );
 
+flush_tickit;
+
 is_termlog( [ SETBG(undef),
-              GOTO(0,5),
-              DELETECH(1) ],
+              ( $Tickit::Test::MockTerm::VERSION >= 0.45 ?
+                  ( SCROLLRECT(0,5,1,75, 0,1) ) :
+                  ( GOTO(0,5), DELETECH(1) ) ),
+              GOTO(0,79),
+              SETBG(undef),
+              ERASECH(1),
+              GOTO(0,5) ],
             'Termlog after ->text_delete' );
 
 is_display( [ " Hell" ],
@@ -87,12 +97,18 @@ is( $entry->text_splice( 0, 2, "Y" ), " H", '$entry->text_splice shrink' );
 is( $entry->text,     "Yell", '$entry->text after ->text_splice shrink' );
 is( $entry->position, 4,      '$entry->position after ->text_splice shrink' );
 
+flush_tickit;
+
 is_termlog( [ SETBG(undef),
-              GOTO(0,0),
-              DELETECH(1),
+              ( $Tickit::Test::MockTerm::VERSION >= 0.45 ?
+                  ( SCROLLRECT(0,0,1,80, 0,1) ) :
+                  ( GOTO(0,0), DELETECH(1) ) ),
               GOTO(0,0),
               SETPEN,
               PRINT("Y"),
+              GOTO(0,79),
+              SETBG(undef),
+              ERASECH(1),
               GOTO(0,4) ],
             'Termlog after ->text_splice shrink' );
 
@@ -105,9 +121,12 @@ is( $entry->text_splice( 3, 1, "p" ), "l", '$entry->text_splice preserve' );
 is( $entry->text,     "Yelp", '$entry->text after ->text_splice preserve' );
 is( $entry->position, 4,      '$entry->position after ->text_splice preserve' );
 
+flush_tickit;
+
 is_termlog( [ GOTO(0,3),
               SETPEN,
-              PRINT("p") ],
+              PRINT("p"),
+              GOTO(0,4) ],
             'Termlog after ->text_splice preserve' );
 
 is_display( [ "Yelp" ],
@@ -119,12 +138,16 @@ is( $entry->text_splice( 3, 1, "low" ), "p", '$entry->text_splice grow' );
 is( $entry->text,     "Yellow", '$entry->text after ->text_splice grow' );
 is( $entry->position, 6,        '$entry->position after ->text_splice grow' );
 
+flush_tickit;
+
 is_termlog( [ SETBG(undef),
-              GOTO(0,3),
-              INSERTCH(2),
+              ( $Tickit::Test::MockTerm::VERSION >= 0.45 ?
+                  ( SCROLLRECT(0,3,1,77, 0,-2) ) :
+                  ( GOTO(0,3), INSERTCH(2) ) ),
               GOTO(0,3),
               SETPEN,
-              PRINT("low") ],
+              PRINT("low"),
+              GOTO(0,6) ],
             'Termlog after ->text_splice grow' );
 
 is_display( [ "Yellow" ],
@@ -135,6 +158,8 @@ is_cursorpos( 0, 6, 'Position after ->text_splice grow' );
 $entry->set_position( 3 );
 
 is( $entry->position, 3, '$entry->position after ->set_position' );
+
+flush_tickit;
 
 is_termlog( [ GOTO(0,3) ],
             'Termlog after ->set_position' );
@@ -196,13 +221,6 @@ drain_termlog;
    flush_tickit;
 
    is_termlog( [ SETBG(undef),
-                 GOTO(2,2),
-                 SETPEN,
-                 PRINT("And Different text"),
-                 SETBG(undef),
-                 ERASECH(58),
-                 GOTO(2,2),
-                 GOTO(2,9),
                  GOTO(2,2),
                  SETBG(undef),
                  PRINT("And Different text"),

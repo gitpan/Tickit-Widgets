@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::SingleChildWidget );
 use Tickit::Style;
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 use constant WIDGET_PEN_FROM_STYLE => 1;
 

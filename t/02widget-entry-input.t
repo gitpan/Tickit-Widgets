@@ -41,6 +41,8 @@ presskey( key => "Right" );
 
 is( $entry->position, 1, '$entry->position after Right' );
 
+flush_tickit;
+
 is_termlog( [ GOTO(0,1) ],
             'Termlog after Right' );
 
@@ -49,6 +51,8 @@ is_cursorpos( 0, 1, 'Position after Right' );
 presskey( key => "End" );
 
 is( $entry->position, 7, '$entry->position after End' );
+
+flush_tickit;
 
 is_termlog( [ GOTO(0,7) ],
             'Termlog after End' );
@@ -59,6 +63,8 @@ presskey( key => "Left" );
 
 is( $entry->position, 6, '$entry->position after Left' );
 
+flush_tickit;
+
 is_termlog( [ GOTO(0,6) ],
             'Termlog after Left' );
 
@@ -67,6 +73,8 @@ is_cursorpos( 0, 6, 'Position after Left' );
 presskey( key => "Home" );
 
 is( $entry->position, 0, '$entry->position after Home' );
+
+flush_tickit;
 
 is_termlog( [ GOTO(0,0) ],
             'Termlog after Home' );
@@ -78,12 +86,16 @@ presskey( text => "X" );
 is( $entry->text,     "XInitial", '$entry->text after X' );
 is( $entry->position, 1,          '$entry->position after X' );
 
+flush_tickit;
+
 is_termlog( [ SETBG(undef),
-              GOTO(0,0),
-              INSERTCH(1),
+              ( $Tickit::Test::MockTerm::VERSION >= 0.45 ?
+                  ( SCROLLRECT(0,0,1,80, 0,-1) ) :
+                  ( GOTO(0,0), INSERTCH(1) ) ),
               GOTO(0,0),
               SETPEN,
-              PRINT("X") ],
+              PRINT("X"),
+              GOTO(0,1) ],
             'Termlog after X' );
 
 is_display( [ "XInitial" ],
@@ -96,9 +108,16 @@ presskey( key => "Backspace" );
 is( $entry->text,     "Initial", '$entry->text after Backspace' );
 is( $entry->position, 0,         '$entry->position after Backspace' );
 
+flush_tickit;
+
 is_termlog( [ SETBG(undef),
-              GOTO(0,0),
-              DELETECH(1) ],
+              ( $Tickit::Test::MockTerm::VERSION >= 0.45 ?
+                  ( SCROLLRECT(0,0,1,80, 0,1) ) :
+                  ( GOTO(0,0), DELETECH(1) ) ),
+              GOTO(0,79),
+              SETBG(undef),
+              ERASECH(1),
+              GOTO(0,0) ],
             'Termlog after Backspace' );
 
 is_display( [ "Initial" ],
@@ -111,9 +130,16 @@ presskey( key => "Delete" );
 is( $entry->text,     "nitial", '$entry->text after Delete' );
 is( $entry->position, 0,        '$entry->position after Delete' );
 
+flush_tickit;
+
 is_termlog( [ SETBG(undef),
-              GOTO(0,0),
-              DELETECH(1) ],
+              ( $Tickit::Test::MockTerm::VERSION >= 0.45 ?
+                  ( SCROLLRECT(0,0,1,80, 0,1) ) :
+                  ( GOTO(0,0), DELETECH(1) ) ),
+              GOTO(0,79),
+              SETBG(undef),
+              ERASECH(1),
+              GOTO(0,0) ],
             'Termlog after Delete' );
 
 is_display( [ "nitial" ],
@@ -132,6 +158,9 @@ $entry->set_on_enter(
 presskey( key => "Enter" );
 
 is( $line, "nitial", 'on_enter $_[1] is line' );
+
+flush_tickit;
+
 is_termlog( [],
             'Termlog unmodified after Enter' );
 

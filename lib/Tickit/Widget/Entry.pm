@@ -1,7 +1,7 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2011-2013 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2011-2014 -- leonerd@leonerd.org.uk
 
 package Tickit::Widget::Entry;
 
@@ -9,8 +9,9 @@ use strict;
 use warnings;
 use base qw( Tickit::Widget );
 use Tickit::Style;
+Tickit::Window->VERSION( '0.39' ); # expose_after_scroll default on
 
-our $VERSION = '0.24';
+our $VERSION = '0.25';
 
 use Tickit::Utils qw( textwidth chars2cols cols2chars substrwidth );
 
@@ -19,7 +20,7 @@ use constant CAN_FOCUS => 1;
 # Positions in this code can get complicated. The following conventions apply:
 #   $pos_ch  = a position in CHaracters within a Unicode string (length, substr,..)
 #   $pos_co  = a position in screen COlumns counted from the start of the string
-#   $pos_x   = a position in screen columns from the start of the window ($win->goto)
+#   $pos_x   = a position in screen columns from the start of the window ($win positions)
 
 =head1 NAME
 
@@ -265,10 +266,6 @@ sub posttext_render
    $rb->text_at( 0, 0, $self->get_style_values( "more_right" ), $self->get_style_pen( "more" ) );
 }
 
-# Tickit 0.35's ->render_to_rb still calls $win->clear :(
-# Doesn't overly matter but our unit tests will get upset
-use constant CLEAR_BEFORE_RENDER => 0;
-
 sub render_to_rb
 {
    my $self = shift;
@@ -386,8 +383,8 @@ sub _text_spliced
 
    my $need_reprint = 0;
 
-   if( $delta_co > 0 and !$at_end or
-       $delta_co < 0 ) {
+   # No point doing a scrollrect if there's nothing after here
+   if( $delta_co != 0 and !$at_end ) {
       $win->scrollrect( 0, $pos_x, 1, $win->cols - $pos_x, 0, -$delta_co ) or
          $need_reprint = 1;
    }
@@ -395,42 +392,31 @@ sub _text_spliced
    if( $need_reprint ) {
       # ICH/DCH failed; we'll have to reprint the entire rest of the line from
       # here
-      my $right_co = $self->{scrolloffs_co} + $width;
-
-      $win->goto( 0, $pos_x );
-      $win->print( substrwidth( $self->text, $pos_co, $right_co - $pos_co ) );
-
-      my $trailing_blank_co = $right_co - length($self->text);
-      $win->erasech( $trailing_blank_co ) if $trailing_blank_co > 0;
-
-      $win->goto( 0, $pos_x );
+      $win->expose(
+         Tickit::Rect->new( top => 0, left => $pos_x, lines => 1, right => $width )
+      );
       return;
    }
 
    if( $insertedlen_co > 0 ) {
-      my $right_co = $self->{scrolloffs_co} + $width;
+      $win->expose(
+         Tickit::Rect->new( top => 0, left => $pos_x, lines => 1, cols => $insertedlen_co )
+      );
 
-      my $end_co = $pos_co + $insertedlen_co;
-
-      if( $end_co > $right_co ) {
-         substrwidth( $inserted, $right_co - $pos_co, "" );
+      if( my $posttext_width = $self->posttext_width ) {
+         $win->expose(
+            Tickit::Rect->new( top => 0, left => $width - $posttext_width, lines => 1, right => $width )
+         );
       }
-
-      $win->goto( 0, $pos_x );
-      $win->print( $inserted );
    }
 
    if( $delta_co < 0 and $self->{scrolloffs_co} + $width < textwidth $self->text ) {
-      my $marker = $self->get_style_values( "more_right" );
-      my $damagewidth = -$delta_co + textwidth $marker;
+      # Add extra damage to redraw the trashed posttext marker
+      my $rhs_x = -$delta_co + $self->posttext_width;
 
-      my $rhs_x  = $width - $damagewidth;
-      my $rhs_co = $rhs_x + $self->{scrolloffs_co};
-
-      $win->goto( 0, $rhs_x );
-      $win->print( substrwidth( $self->text, $rhs_co, $damagewidth ) );
-
-      $win->goto( 0, $pos_x + $insertedlen_co );
+      $win->expose(
+         Tickit::Rect->new( top => 0, left => $width - $rhs_x, lines => 1, right => $width )
+      );
    }
 }
 
@@ -531,10 +517,6 @@ sub set_position
    $pos_ch = length $self->{text} if $pos_ch > length $self->{text};
 
    $self->reposition_cursor( $pos_ch );
-
-   if( my $win = $self->window ) {
-      $win->restore;
-   }
 }
 
 =head1 METHODS
@@ -677,10 +659,6 @@ sub text_splice
    }
 
    $self->reposition_cursor( $new_pos_ch ) if defined $new_pos_ch and $new_pos_ch != $self->{pos_ch};
-
-   if( $pos_ch + $textlen_ch != $self->{pos_ch} ) {
-      $self->window->restore;
-   }
 
    return $deleted;
 }

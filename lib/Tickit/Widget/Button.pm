@@ -14,7 +14,7 @@ use base qw( Tickit::Widget );
 use Tickit::Style;
 use Tickit::RenderBuffer qw( LINE_SINGLE LINE_DOUBLE LINE_THICK );
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 use Tickit::Utils qw( textwidth );
 

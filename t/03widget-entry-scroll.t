@@ -60,7 +60,6 @@ $entry->set_position( 0 );
 flush_tickit;
 
 is_termlog( [ GOTO(0,0),
-              GOTO(0,0),
               SETPEN,
               PRINT(("A"x70).("B"x7)),
               SETPEN(fg => 6),
@@ -78,8 +77,7 @@ $entry->set_position( 90 );
 
 flush_tickit;
 
-is_termlog( [ GOTO(0,50),
-              GOTO(0,0),
+is_termlog( [ GOTO(0,0),
               SETPEN(fg => 6),
               PRINT("<.."),
               SETPEN,
@@ -105,19 +103,18 @@ $entry->text_delete( 0, 1 );
 flush_tickit;
 
 is_termlog( [ SETBG(undef),
-              GOTO(0,0),
-              DELETECH(1),
+              ( $Tickit::Test::MockTerm::VERSION >= 0.45 ?
+                  ( SCROLLRECT(0,0,1,80, 0,1) ) :
+                  ( GOTO(0,0), DELETECH(1) ) ),
               GOTO(0,76),
               SETPEN,
-              PRINT("BBBB"),
-              GOTO(0,0),
-              GOTO(0,79),
-              SETPEN(fg => 6),
-              PRINT(">"),
+              PRINT("B"),
+              SETPEN(fg=>6),
+              PRINT("..>"),
               GOTO(0,0) ],
             'Termlog after ->text_delete 0, 1' );
 
-is_display( [ ("A"x69).("B"x10).">" ],
+is_display( [ ("A"x69).("B"x8)."..>" ],
             'Display after ->text_delete 0, 1' );
 
 is_cursorpos( 0, 0, 'Position after ->text_delete 0, 1' );

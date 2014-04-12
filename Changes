@@ -1,5 +1,16 @@
 Revision history for Tickit-Widgets
 
+0.16    2014/04/12 04:10:47
+        [CHANGES]
+         * Update Tickit::Widget::Entry to avoid direct Window drawing
+           operations; use ->expose calls to request re-rendering
+         * Prepare for Tickit 0.45's removal of INSERTCH/DELETECH from
+           is_termlog() logging
+
+        [BUGFIXES]
+         * Correct display of Entry widget's posttext marker when deleting
+           text before it
+
 0.15    2014/04/01 20:37:30
         [BUGFIXES]
          * Remove child widget from GridBox before exposing cleared area
