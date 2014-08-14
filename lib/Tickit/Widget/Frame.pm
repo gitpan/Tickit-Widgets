@@ -1,7 +1,7 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2011-2013 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2011-2014 -- leonerd@leonerd.org.uk
 
 package Tickit::Widget::Frame;
 
@@ -37,10 +37,9 @@ C<Tickit::Widget::Frame> - draw a frame around another widget
  );
 
  my $frame = Tickit::Widget::Frame->new(
+    child => $hello,
     style => { linetype => "single" },
  );
-
- $frame->add( $hello );
 
  Tickit->new( root => $frame )->run;
 

@@ -1,7 +1,7 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2013 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2013-2014 -- leonerd@leonerd.org.uk
 
 package Tickit::Widget::GridBox;
 
@@ -10,7 +10,7 @@ use warnings;
 use base qw( Tickit::ContainerWidget );
 use Tickit::Style;
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 use Carp;
 
@@ -169,6 +169,26 @@ sub children
 
 =cut
 
+=head2 $count = $gridbox->rowcount
+
+=head2 $count = $gridbox->colcount
+
+Returns the number of rows or columns in the grid.
+
+=cut
+
+sub rowcount
+{
+   my $self = shift;
+   return scalar @{ $self->{grid} }
+}
+
+sub colcount
+{
+   my $self = shift;
+   return $self->{max_col} + 1;
+}
+
 =head2 $gridbox->add( $row, $col, $child, %opts )
 
 Sets the child widget to display in the given grid cell. Cells do not need to
@@ -251,11 +271,159 @@ sub remove
 
    $self->{max_col} = max map { $_ ? $#$_ : 0 } @$grid;
 
-   my $childrect = $child->window->rect;
+   my $childrect = $child->window ? $child->window->rect : undef;
 
    $self->SUPER::remove( $child );
 
-   $self->window->expose( $childrect );
+   $self->window->expose( $childrect ) if $childrect;
+}
+
+=head2 $child = $gridbox->get( $row, $col )
+
+Returns the child widget at the given cell in the grid. If the row or column
+index are beyond the bounds of the grid, or if there is no widget in the given
+cell, returns C<undef>.
+
+=cut
+
+sub get
+{
+   my $self = shift;
+   my ( $row, $col ) = @_;
+
+   return undef if $row >= @{ $self->{grid} };
+   return $self->{grid}[$row][$col];
+}
+
+=head2 @children = $gridbox->get_row( $row )
+
+=head2 @children = $gridbox->get_col( $col )
+
+Convenient shortcut to call C<get> on an entire row or column of the grid.
+
+=cut
+
+sub get_row
+{
+   my $self = shift;
+   my ( $row ) = @_;
+   return map { $self->get( $row, $_ ) } 0 .. $self->colcount - 1;
+}
+
+sub get_col
+{
+   my $self = shift;
+   my ( $col ) = @_;
+   return map { $self->get( $_, $col ) } 0 .. $self->rowcount - 1;
+}
+
+=head2 $gridbox->insert_row( $before_row, [ @children ] )
+
+Inserts a new row into the grid by moving the existing rows after it lower
+down. Any child widgets in the referenced array will be set on the cells of
+the new row, at an column corresponding to its index in the array. A child of
+C<undef> will be skipped over.
+
+=cut
+
+sub insert_row
+{
+   my $self = shift;
+   my ( $row, $children ) = @_;
+
+   splice @{ $self->{grid} }, $row, 0, [];
+
+   foreach my $col ( 0 .. $#$children ) {
+      next unless my $child = $children->[$col];
+
+      $self->add( $row, $col, $child ); # No options
+   }
+}
+
+=head2 $gridbox->insert_col( $before_col, [ @children ] )
+
+Inserts a new column into the grid by moving the existing columns after it to
+the right. Any child widgets in the referenced array will be set on the cells
+of the new column, at a row corresponding to its index in the array. A child
+of C<undef> will be skipped over.
+
+=cut
+
+sub insert_col
+{
+   my $self = shift;
+   my ( $col, $children ) = @_;
+
+   my $grid = $self->{grid};
+   $self->{max_col}++;
+
+   foreach my $row ( 0 .. $self->rowcount - 1 ) {
+      splice @{ $grid->[$row] }, $col, 0, ( undef );
+
+      next unless my $child = $children->[$row];
+
+      $self->add( $row, $col, $child ); # No options
+   }
+}
+
+=head2 $gridbox->append_row( [ @children ] )
+
+Shortcut to inserting a new row after the end of the current grid.
+
+=cut
+
+sub append_row
+{
+   my $self = shift;
+   $self->insert_row( $self->rowcount, @_ );
+}
+
+=head2 $gridbox->append_col( [ @children ] )
+
+Shortcut to inserting a new column after the end of the current grid.
+
+=cut
+
+sub append_col
+{
+   my $self = shift;
+   $self->insert_col( $self->colcount, @_ );
+}
+
+=head2 $gridbox->delete_row( $row )
+
+Deletes a row of the grid by moving the existing rows after it higher up.
+
+=cut
+
+sub delete_row
+{
+   my $self = shift;
+   my ( $row ) = @_;
+
+   $self->remove( $row, $_ ) for 0 .. $self->colcount - 1;
+
+   splice @{ $self->{grid} }, $row, 1, ();
+   $self->children_changed;
+}
+
+=head2 $gridbox->delete_col( $col )
+
+Deletes a column of the grid by moving the existing columns after it to the
+left.
+
+=cut
+
+sub delete_col
+{
+   my $self = shift;
+   my ( $col ) = @_;
+
+   $self->remove( $_, $col ) for 0 .. $self->rowcount - 1;
+
+   splice @{ $self->{grid}[$_] }, $col, 1, () for 0 .. $self->rowcount - 1;
+   $self->{max_col}--;
+   $self->children_changed;
 }
 
 sub reshape
@@ -266,8 +434,8 @@ sub reshape
    my @row_buckets;
    my @col_buckets;
 
-   my $max_row = $#{$self->{grid}};
-   my $max_col = $self->{max_col};
+   my $max_row = $self->rowcount - 1;
+   my $max_col = $self->colcount - 1;
 
    my ( $row_spacing, $col_spacing ) = $self->get_style_values(qw( row_spacing col_spacing ));
 
@@ -351,6 +519,21 @@ sub render_to_rb
 
    $rb->eraserect( $rect );
 }
+
+=head1 TODO
+
+=over 4
+
+=item *
+
+Add C<move_{row,col}> methods for re-ordering existing rows or columns
+
+=item *
+
+Make C<{insert,append,delete,move}> operations more efficient by deferring the
+C<children_changed> call until they are done.
+
+=back
 
 =head1 AUTHOR
 

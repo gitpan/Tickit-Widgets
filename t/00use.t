@@ -13,10 +13,12 @@ use_ok( 'Tickit::Widget::CheckButton' );
 use_ok( 'Tickit::Widget::Entry' );
 use_ok( 'Tickit::Widget::Frame' );
 use_ok( 'Tickit::Widget::GridBox' );
+use_ok( 'Tickit::Widget::HBox' );
 use_ok( 'Tickit::Widget::HSplit' );
 use_ok( 'Tickit::Widget::Placegrid' );
 use_ok( 'Tickit::Widget::RadioButton' );
 use_ok( 'Tickit::Widget::Spinner' );
+use_ok( 'Tickit::Widget::VBox' );
 use_ok( 'Tickit::Widget::VSplit' );
 
 done_testing;

@@ -15,11 +15,12 @@ my $win = mk_window;
 
 my $static = Tickit::Widget::Static->new( text => "Widget" );
 
-my $widget = Tickit::Widget::Frame->new;
+my $widget = Tickit::Widget::Frame->new(
+   child => $static,
+);
 
 ok( defined $widget, 'defined $widget' );
 
-$widget->add( $static );
 $widget->set_window( $win );
 
 ok( defined $static->window, '$static has window after $widget->set_window' );

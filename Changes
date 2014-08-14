@@ -1,5 +1,12 @@
 Revision history for Tickit-Widgets
 
+0.17    2014/08/14 18:12:50
+        [CHANGES]
+         * Capture Tickit::Widget::HBox and ::VBox from main Tickit dist
+         * Added editing methods to Tickit::Widget::GridBox:
+            + insert/append/delete row/column
+            + get cell/row/column
+
 0.16    2014/04/12 04:10:47
         [CHANGES]
          * Update Tickit::Widget::Entry to avoid direct Window drawing
