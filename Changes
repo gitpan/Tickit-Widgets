@@ -1,5 +1,10 @@
 Revision history for Tickit-Widgets
 
+0.18    2014/08/16 21:17:51
+        [BUGFIXES]
+         * Cope with differing Tickit::Widget::Frame linestyles per border
+           when passed at construction time
+
 0.17    2014/08/14 18:12:50
         [CHANGES]
          * Capture Tickit::Widget::HBox and ::VBox from main Tickit dist

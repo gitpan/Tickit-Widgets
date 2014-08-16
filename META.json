@@ -32,15 +32,15 @@
    "provides" : {
       "Tickit::Widget::Border" : {
          "file" : "lib/Tickit/Widget/Border.pm",
-         "version" : "0.17"
+         "version" : "0.18"
       },
       "Tickit::Widget::Button" : {
          "file" : "lib/Tickit/Widget/Button.pm",
-         "version" : "0.17"
+         "version" : "0.18"
       },
       "Tickit::Widget::CheckButton" : {
          "file" : "lib/Tickit/Widget/CheckButton.pm",
-         "version" : "0.17"
+         "version" : "0.18"
       },
       "Tickit::Widget::Entry" : {
          "file" : "lib/Tickit/Widget/Entry.pm",
@@ -48,11 +48,11 @@
       },
       "Tickit::Widget::Frame" : {
          "file" : "lib/Tickit/Widget/Frame.pm",
-         "version" : "0.30"
+         "version" : "0.31"
       },
       "Tickit::Widget::GridBox" : {
          "file" : "lib/Tickit/Widget/GridBox.pm",
-         "version" : "0.17"
+         "version" : "0.18"
       },
       "Tickit::Widget::HBox" : {
          "file" : "lib/Tickit/Widget/HBox.pm",
@@ -60,7 +60,7 @@
       },
       "Tickit::Widget::HSplit" : {
          "file" : "lib/Tickit/Widget/HSplit.pm",
-         "version" : "0.17"
+         "version" : "0.18"
       },
       "Tickit::Widget::LinearBox" : {
          "file" : "lib/Tickit/Widget/LinearBox.pm",
@@ -68,19 +68,19 @@
       },
       "Tickit::Widget::LinearSplit" : {
          "file" : "lib/Tickit/Widget/LinearSplit.pm",
-         "version" : "0.17"
+         "version" : "0.18"
       },
       "Tickit::Widget::Placegrid" : {
          "file" : "lib/Tickit/Widget/Placegrid.pm",
-         "version" : "0.17"
+         "version" : "0.18"
       },
       "Tickit::Widget::RadioButton" : {
          "file" : "lib/Tickit/Widget/RadioButton.pm",
-         "version" : "0.17"
+         "version" : "0.18"
       },
       "Tickit::Widget::Spinner" : {
          "file" : "lib/Tickit/Widget/Spinner.pm",
-         "version" : "0.17"
+         "version" : "0.18"
       },
       "Tickit::Widget::VBox" : {
          "file" : "lib/Tickit/Widget/VBox.pm",
@@ -88,11 +88,11 @@
       },
       "Tickit::Widget::VSplit" : {
          "file" : "lib/Tickit/Widget/VSplit.pm",
-         "version" : "0.17"
+         "version" : "0.18"
       },
       "Tickit::Widgets" : {
          "file" : "lib/Tickit/Widgets.pm",
-         "version" : "0.17"
+         "version" : "0.18"
       }
    },
    "release_status" : "stable",
@@ -101,5 +101,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.17"
+   "version" : "0.18"
 }

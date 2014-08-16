@@ -12,7 +12,7 @@ use Tickit::Style;
 
 use Tickit::WidgetRole::Alignable name => "title_align";
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 use Carp;
 
@@ -75,13 +75,13 @@ The C<ascii> linetype is default, and uses only the C<-|+> ASCII characters.
 Other linetypes use Unicode box-drawing characters. These may not be supported
 by all terminals or fonts.
 
-=item top_linetype => STRING
+=item linetype_top => STRING
 
-=item bottom_linetype => STRING
+=item linetype_bottom => STRING
 
-=item left_linetype => STRING
+=item linetype_left => STRING
 
-=item right_linetype => STRING
+=item linetype_right => STRING
 
 Overrides the C<linetype> attribute for each side of the frame specifically.
 If two line-drawing styles meet at corners they should be drawn correctly if
@@ -169,7 +169,9 @@ sub on_style_changed_values
    foreach (qw( top bottom left right )) {
       no warnings 'uninitialized'; # treat undef as false
 
-      my $new = ( $values{"linetype_$_"}[1] // $linetype ) ne "none";
+      my $new = ( $values{"linetype_$_"}[1] // $self->get_style_values( "linetype_$_") // $linetype )
+         ne "none";
+
       $reshape = 1 if $self->{"has_$_"} != $new;
       $self->{"has_$_"} = $new;
    }

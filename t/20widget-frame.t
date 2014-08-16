@@ -149,4 +149,26 @@ $widget->set_window( undef );
 
 ok( !defined $static->window, '$static has no window after ->set_window undef' );
 
+# Different linetypes to constructor
+{
+   my $widget = Tickit::Widget::Frame->new(
+      style => {
+         linetype => "none",
+         linetype_left  => "single",
+         linetype_right => "single",
+      },
+      child => $static,
+   );
+
+   $widget->set_window( $win );
+
+   flush_tickit;
+
+   is_display( [ [TEXT("\x{2502}"), TEXT("New text"), BLANK(70), TEXT("\x{2502}")],
+                 ( [TEXT("\x{2502}"), BLANK(78), TEXT("\x{2502}")] ) x 24 ],
+               'Display for $widget with individual linetypes to constructor' );
+
+   $widget->set_window( undef );
+}
+
 done_testing;
