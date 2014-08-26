@@ -7,6 +7,7 @@ my $build = Module::Build->new(
    module_name => 'Tickit::Widgets',
    dist_abstract => "a collection of Tickit::Widget implementations",
    requires => {
+      'perl' => '5.010',
       'Tickit::RenderBuffer' => 0,
       'Tickit::Utils' => '0.29',
       'Tickit::Widget' => '0.40', # ->requested_* sizing

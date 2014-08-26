@@ -25,26 +25,31 @@
             "Tickit::Style" : "0.32",
             "Tickit::Utils" : "0.29",
             "Tickit::Widget" : "0.40",
-            "Tickit::Window" : "0.39"
+            "Tickit::Window" : "0.39",
+            "perl" : "5.010"
          }
       }
    },
    "provides" : {
       "Tickit::Widget::Border" : {
          "file" : "lib/Tickit/Widget/Border.pm",
-         "version" : "0.18"
+         "version" : "0.19"
       },
       "Tickit::Widget::Button" : {
          "file" : "lib/Tickit/Widget/Button.pm",
-         "version" : "0.18"
+         "version" : "0.19"
       },
       "Tickit::Widget::CheckButton" : {
          "file" : "lib/Tickit/Widget/CheckButton.pm",
-         "version" : "0.18"
+         "version" : "0.19"
       },
       "Tickit::Widget::Entry" : {
          "file" : "lib/Tickit/Widget/Entry.pm",
          "version" : "0.25"
+      },
+      "Tickit::Widget::Fill" : {
+         "file" : "lib/Tickit/Widget/Fill.pm",
+         "version" : "0.19"
       },
       "Tickit::Widget::Frame" : {
          "file" : "lib/Tickit/Widget/Frame.pm",
@@ -52,7 +57,7 @@
       },
       "Tickit::Widget::GridBox" : {
          "file" : "lib/Tickit/Widget/GridBox.pm",
-         "version" : "0.18"
+         "version" : "0.19"
       },
       "Tickit::Widget::HBox" : {
          "file" : "lib/Tickit/Widget/HBox.pm",
@@ -60,7 +65,7 @@
       },
       "Tickit::Widget::HSplit" : {
          "file" : "lib/Tickit/Widget/HSplit.pm",
-         "version" : "0.18"
+         "version" : "0.19"
       },
       "Tickit::Widget::LinearBox" : {
          "file" : "lib/Tickit/Widget/LinearBox.pm",
@@ -68,19 +73,19 @@
       },
       "Tickit::Widget::LinearSplit" : {
          "file" : "lib/Tickit/Widget/LinearSplit.pm",
-         "version" : "0.18"
+         "version" : "0.19"
       },
       "Tickit::Widget::Placegrid" : {
          "file" : "lib/Tickit/Widget/Placegrid.pm",
-         "version" : "0.18"
+         "version" : "0.19"
       },
       "Tickit::Widget::RadioButton" : {
          "file" : "lib/Tickit/Widget/RadioButton.pm",
-         "version" : "0.18"
+         "version" : "0.19"
       },
       "Tickit::Widget::Spinner" : {
          "file" : "lib/Tickit/Widget/Spinner.pm",
-         "version" : "0.18"
+         "version" : "0.19"
       },
       "Tickit::Widget::VBox" : {
          "file" : "lib/Tickit/Widget/VBox.pm",
@@ -88,11 +93,11 @@
       },
       "Tickit::Widget::VSplit" : {
          "file" : "lib/Tickit/Widget/VSplit.pm",
-         "version" : "0.18"
+         "version" : "0.19"
       },
       "Tickit::Widgets" : {
          "file" : "lib/Tickit/Widgets.pm",
-         "version" : "0.18"
+         "version" : "0.19"
       }
    },
    "release_status" : "stable",
@@ -101,5 +106,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.18"
+   "version" : "0.19"
 }

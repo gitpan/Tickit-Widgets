@@ -14,6 +14,7 @@ lib/Tickit/Widget/Border.pm
 lib/Tickit/Widget/Button.pm
 lib/Tickit/Widget/CheckButton.pm
 lib/Tickit/Widget/Entry.pm
+lib/Tickit/Widget/Fill.pm
 lib/Tickit/Widget/Frame.pm
 lib/Tickit/Widget/GridBox.pm
 lib/Tickit/Widget/HBox.pm
@@ -39,6 +40,7 @@ t/03widget-entry-scroll.t
 t/10widget-button.t
 t/11widget-radiobutton.t
 t/12widget-checkbutton.t
+t/13widget-fill.t
 t/20widget-frame.t
 t/21widget-border.t
 t/22widget-hbox.t

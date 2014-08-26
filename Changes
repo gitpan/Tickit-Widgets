@@ -1,5 +1,9 @@
 Revision history for Tickit-Widgets
 
+0.19    2014/08/26 18:12:01
+        [CHANGES]
+         * Added Tickit::Widget::Fill
+
 0.18    2014/08/16 21:17:51
         [BUGFIXES]
          * Cope with differing Tickit::Widget::Frame linestyles per border
